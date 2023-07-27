@@ -1,0 +1,2 @@
+# nix puts stuff under the symlink name 'result*'
+result*
