@@ -1,2 +1,6 @@
 # nix puts stuff under the symlink name 'result*'
 result*
+
+# direnv
+.envrc
+.direnv
