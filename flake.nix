@@ -23,7 +23,6 @@
           "wal2json"
           /* pl/java */
           "plv8"
-          /* pg_net */
           "rum"
           /* pgsodium */
           /* pg_stat_monitor */
@@ -35,6 +34,7 @@
           ./ext/pg_hashids.nix
           ./ext/pg_plan_filter.nix
           ./ext/pgsql-http.nix
+          ./ext/pg_net.nix
         ];
 
         makePostgres = version:
