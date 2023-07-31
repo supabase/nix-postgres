@@ -27,16 +27,21 @@
           /* pg_plan_filter */
           /* pg_net */
           "rum"
-          /* pg_hashids */
           /* pgsodium */
           /* pg_stat_monitor */
           "pgvector"
           "pg_repack"
         ];
 
+        ourExtensions = [
+          ./ext/pg_hashids.nix
+        ];
+
         makePostgres = version:
-          pkgs."postgresql_${version}".withPackages (ps:
-            map (ext: ps."${ext}") psqlExtensions
+          let postgresql = pkgs."postgresql_${version}";
+          in postgresql.withPackages (ps:
+            (map (ext: ps."${ext}") psqlExtensions) ++
+            (map (path: pkgs.callPackage path { inherit postgresql; }) ourExtensions)
           );
 
       in {
