@@ -49,7 +49,7 @@
         };
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
-            coreutils
+            coreutils just
           ];
         };
       }
