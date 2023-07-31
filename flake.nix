@@ -26,6 +26,8 @@
           "rum"
           "pgvector"
           "pg_repack"
+          "pgroonga"
+          "timescaledb"
         ];
 
         ourExtensions = [
