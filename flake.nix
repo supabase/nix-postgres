@@ -11,22 +11,24 @@
       let
         pkgs = import nixpkgs { inherit system; };
 
+        psqlExtensions = [
+          "postgis"
+          "pgtap"
+          "pgaudit"
+        ];
+
       in {
         packages = {
 
           # PostgreSQL 14 + extensions
-          psql_14 = pkgs.postgresql_14.withPackages (ps: [
-            ps.postgis
-            ps.pgtap
-            ps.pgaudit
-          ]);
+          psql_14 = pkgs.postgresql_14.withPackages (ps:
+            map (ext: ps."${ext}") psqlExtensions
+          );
 
           # PostgreSQL 15 + extensions
-          psql_15 = pkgs.postgresql_15.withPackages (ps: [
-            ps.postgis
-            ps.pgtap
-            ps.pgaudit
-          ]);
+          psql_15 = pkgs.postgresql_15.withPackages (ps:
+            map (ext: ps."${ext}") psqlExtensions
+          );
 
         };
         devShells.default = pkgs.mkShell {
