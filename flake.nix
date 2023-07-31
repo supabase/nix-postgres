@@ -20,23 +20,29 @@
           "pgjwt"
           "plpgsql_check"
           "pg_safeupdate"
+          "timescaledb"
           "wal2json"
-          /* pl/java */
+          /* pljava */
           "plv8"
           "rum"
           "pgvector"
           "pg_repack"
           "pgroonga"
-          "timescaledb"
         ];
 
         ourExtensions = [
-          ./ext/pg_hashids.nix
-          ./ext/pg_plan_filter.nix
           ./ext/pgsql-http.nix
+          ./ext/pg_plan_filter.nix
           ./ext/pg_net.nix
+          ./ext/pg_hashids.nix
           ./ext/pgsodium.nix
+          /* pg_graphql */
           ./ext/pg_stat_monitor.nix
+          /* autoexplain */
+          /* pg_jsonschema */
+          /* vault */
+          /* hypopg */
+          /* pg_tle */
         ];
 
         makePostgresBin = version:
