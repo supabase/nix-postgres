@@ -18,7 +18,6 @@
           "pg_cron"
           "pgaudit"
           "pgjwt"
-          /* pgsql-http */
           "plpgsql_check"
           "pg_safeupdate"
           "wal2json"
@@ -35,6 +34,7 @@
         ourExtensions = [
           ./ext/pg_hashids.nix
           ./ext/pg_plan_filter.nix
+          ./ext/pgsql-http.nix
         ];
 
         makePostgres = version:
