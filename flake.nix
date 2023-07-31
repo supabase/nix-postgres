@@ -24,7 +24,6 @@
           /* pl/java */
           "plv8"
           "rum"
-          /* pgsodium */
           /* pg_stat_monitor */
           "pgvector"
           "pg_repack"
@@ -35,6 +34,7 @@
           ./ext/pg_plan_filter.nix
           ./ext/pgsql-http.nix
           ./ext/pg_net.nix
+          ./ext/pgsodium.nix
         ];
 
         makePostgres = version:
