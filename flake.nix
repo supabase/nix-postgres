@@ -13,8 +13,25 @@
 
         psqlExtensions = [
           "postgis"
+          "pgrouting"
           "pgtap"
+          "pg_cron"
           "pgaudit"
+          "pgjwt"
+          /* pgsql-http */
+          "plpgsql_check"
+          "pg_safeupdate"
+          "wal2json"
+          /* pl/java */
+          "plv8"
+          /* pg_plan_filter */
+          /* pg_net */
+          "rum"
+          /* pg_hashids */
+          /* pgsodium */
+          /* pg_stat_monitor */
+          "pgvector"
+          "pg_repack"
         ];
 
         makePostgres = version:
