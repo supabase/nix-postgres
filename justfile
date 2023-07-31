@@ -8,5 +8,5 @@ default:
 alias b := build-all
 
 build-all:
-    nix build .#psql_14
-    nix build .#psql_15
+    nix build .#psql_14/bin .#psql_14/docker
+    nix build .#psql_15/bin .#psql_15/docker

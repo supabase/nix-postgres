@@ -37,21 +37,51 @@
           ./ext/pg_stat_monitor.nix
         ];
 
-        makePostgres = version:
+        makePostgresBin = version:
           let postgresql = pkgs."postgresql_${version}";
           in postgresql.withPackages (ps:
             (map (ext: ps."${ext}") psqlExtensions) ++
             (map (path: pkgs.callPackage path { inherit postgresql; }) ourExtensions)
           );
 
-      in {
-        packages = {
-          # PostgreSQL 14 + extensions
-          psql_14 = makePostgres "14";
+        makePostgresDocker = version: binPackage:
+          pkgs.dockerTools.buildImage {
+            name = "postgresql-${version}";
+            tag = "latest";
+            copyToRoot = pkgs.buildEnv {
+              name = "postgresql-${version}-env";
+              paths = with pkgs; [ coreutils bash binPackage ];
+              pathsToLink = [ "/bin" ];
+            };
 
-          # PostgreSQL 15 + extensions
+            runAsRoot = ''
+              #!${pkgs.runtimeShell}
+              mkdir -p /data
+            '';
+          
+            config = {
+              Cmd = [ "/bin/postgres" ];
+              ExposedPorts = { "5432/tcp" = {}; };
+              WorkingDir = "/data";
+              Volumes = { "/data" = { }; };
+            };
+          
+            diskSize = 1024;
+            buildVMMemorySize = 1024;
+          };
+
+        makePostgres = version: (rec {
+          bin = makePostgresBin version;
+          docker = makePostgresDocker version bin;
+          recurseForDerivations = true;
+        });
+
+      in {
+        packages = flake-utils.lib.flattenTree {
+          psql_14 = makePostgres "14";
           psql_15 = makePostgres "15";
         };
+
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
             coreutils just
