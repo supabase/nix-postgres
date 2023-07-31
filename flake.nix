@@ -41,7 +41,7 @@
           /* pg_jsonschema */
           ./ext/vault.nix
           ./ext/hypopg.nix
-          /* pg_tle */
+          ./ext/pg_tle.nix
         ];
 
         makePostgresBin = version:
