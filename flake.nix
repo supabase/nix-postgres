@@ -24,7 +24,6 @@
           "wal2json"
           /* pl/java */
           "plv8"
-          /* pg_plan_filter */
           /* pg_net */
           "rum"
           /* pgsodium */
@@ -35,6 +34,7 @@
 
         ourExtensions = [
           ./ext/pg_hashids.nix
+          ./ext/pg_plan_filter.nix
         ];
 
         makePostgres = version:
