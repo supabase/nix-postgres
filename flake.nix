@@ -41,7 +41,7 @@
           /* autoexplain */
           /* pg_jsonschema */
           ./ext/vault.nix
-          /* hypopg */
+          ./ext/hypopg.nix
           /* pg_tle */
         ];
 
