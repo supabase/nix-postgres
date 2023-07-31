@@ -17,19 +17,18 @@
           "pgaudit"
         ];
 
+        makePostgres = version:
+          pkgs."postgresql_${version}".withPackages (ps:
+            map (ext: ps."${ext}") psqlExtensions
+          );
+
       in {
         packages = {
-
           # PostgreSQL 14 + extensions
-          psql_14 = pkgs.postgresql_14.withPackages (ps:
-            map (ext: ps."${ext}") psqlExtensions
-          );
+          psql_14 = makePostgres "14";
 
           # PostgreSQL 15 + extensions
-          psql_15 = pkgs.postgresql_15.withPackages (ps:
-            map (ext: ps."${ext}") psqlExtensions
-          );
-
+          psql_15 = makePostgres "15";
         };
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
