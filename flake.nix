@@ -38,7 +38,6 @@
           ./ext/pgsodium.nix
           /* pg_graphql */
           ./ext/pg_stat_monitor.nix
-          /* autoexplain */
           /* pg_jsonschema */
           ./ext/vault.nix
           ./ext/hypopg.nix
