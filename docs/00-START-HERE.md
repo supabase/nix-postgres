@@ -1,0 +1,3 @@
+# 00 — Starting Line: installing Nix and playing around
+
+Lorem in aliquip cupidatat cupidatat est mollit...
