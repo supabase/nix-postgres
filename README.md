@@ -26,3 +26,5 @@ mean time.
   (you should try it, though!) The workflow used for this repo is "linear
   commits, no merges." If you submit PRs, they'll be rebased on top of the
   existing history to match that. (YMMV but I prefer this style.)
+
+[jujutsu]: https://github.com/martinvonz/jj
