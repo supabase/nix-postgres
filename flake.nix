@@ -40,7 +40,7 @@
           ./ext/pg_stat_monitor.nix
           /* autoexplain */
           /* pg_jsonschema */
-          /* vault */
+          ./ext/vault.nix
           /* hypopg */
           /* pg_tle */
         ];
