@@ -44,11 +44,20 @@
           ./ext/pg_tle.nix
         ];
 
+        makePostgresPkgs = version:
+          let postgresql = pkgs."postgresql_${version}";
+          in map (path: pkgs.callPackage path { inherit postgresql; }) ourExtensions;
+        
+        makePostgresPkgsSet = version:
+          (builtins.listToAttrs (map (drv:
+            { name = drv.pname; value = drv; }
+          ) (makePostgresPkgs version)))
+          // { recurseForDerivations = true; };
+
         makePostgresBin = version:
           let postgresql = pkgs."postgresql_${version}";
           in postgresql.withPackages (ps:
-            (map (ext: ps."${ext}") psqlExtensions) ++
-            (map (path: pkgs.callPackage path { inherit postgresql; }) ourExtensions)
+            (map (ext: ps."${ext}") psqlExtensions) ++ (makePostgresPkgs version)
           );
 
         makePostgresDocker = version: binPackage:
@@ -79,6 +88,7 @@
 
         makePostgres = version: (rec {
           bin = makePostgresBin version;
+          exts = makePostgresPkgsSet version;
           docker = makePostgresDocker version bin;
           recurseForDerivations = true;
         });
