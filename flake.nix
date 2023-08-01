@@ -101,7 +101,7 @@
 
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
-            coreutils just
+            coreutils just nix-update
           ];
         };
       }
