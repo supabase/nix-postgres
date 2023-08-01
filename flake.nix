@@ -36,7 +36,7 @@
           ./ext/pg_net.nix
           ./ext/pg_hashids.nix
           ./ext/pgsodium.nix
-          /* pg_graphql */
+          ./ext/pg_graphql.nix
           ./ext/pg_stat_monitor.nix
           ./ext/pg_jsonschema.nix
           ./ext/vault.nix
