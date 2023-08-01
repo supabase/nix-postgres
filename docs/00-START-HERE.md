@@ -1,4 +1,4 @@
-# 00 — Starting Line: installing Nix and playing around
+# 00 &mdash; Starting Line: installing Nix and playing around
 
 Let's go ahead and install Nix. To do that, we'll use the
 **[nix-installer tool]** by Determinate Systems. This works on many platforms,
@@ -78,4 +78,4 @@ examples:
 
 ## Next page
 
-TODO FIXME (aseipp): implement
+Next up: **[01 &mdash; Use this repository](./01-USE-THIS-REPO.md)**
