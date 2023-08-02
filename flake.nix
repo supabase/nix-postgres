@@ -106,10 +106,38 @@
           recurseForDerivations = true;
         });
 
-      in {
-        packages = flake-utils.lib.flattenTree {
+        basePackages = {
           psql_14 = makePostgres "14";
           psql_15 = makePostgres "15";
+        };
+
+        makeCheckHarness = pgpkg:
+          let
+            sqlTests = ./tests/smoke;
+          in pkgs.runCommand "postgres-${pgpkg.version}-check-harness" {
+            nativeBuildInputs = [ pgpkg pg_prove pkgs.procps ];
+          } ''
+            export PGDATA=/tmp/pgdata
+            mkdir -p $PGDATA
+            initdb --locale=C
+            postgres -k /tmp >logfile 2>&1 &
+            sleep 2
+
+            createdb -h localhost testing
+
+            psql -h localhost -d testing -Xaf ${./tests/prime.sql}
+            pg_prove -h localhost -d testing ${sqlTests}/*.sql
+
+            pkill postgres
+            mv logfile $out
+          '';
+
+      in rec {
+        packages = flake-utils.lib.flattenTree basePackages;
+
+        checks = {
+          psql_14 = makeCheckHarness basePackages.psql_14.bin;
+          psql_15 = makeCheckHarness basePackages.psql_15.bin;
         };
 
         devShells.default = pkgs.mkShell {
