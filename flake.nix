@@ -62,6 +62,7 @@
           ./ext/vault.nix
           ./ext/hypopg.nix
           ./ext/pg_tle.nix
+          ./ext/wrappers/default.nix
         ];
 
         makePostgresPkgs = version:
