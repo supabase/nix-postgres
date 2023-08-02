@@ -82,29 +82,17 @@
           );
 
         makePostgresDocker = version: binPackage:
-          pkgs.dockerTools.buildImage {
+          pkgs.dockerTools.buildLayeredImage {
             name = "postgresql-${version}";
             tag = "latest";
-            copyToRoot = pkgs.buildEnv {
-              name = "postgresql-${version}-env";
-              paths = with pkgs; [ coreutils bash binPackage ];
-              pathsToLink = [ "/bin" ];
-            };
+            contents = with pkgs; [ coreutils bash binPackage ];
 
-            runAsRoot = ''
-              #!${pkgs.runtimeShell}
-              mkdir -p /data
-            '';
-          
             config = {
               Cmd = [ "/bin/postgres" ];
               ExposedPorts = { "5432/tcp" = {}; };
               WorkingDir = "/data";
               Volumes = { "/data" = { }; };
             };
-          
-            diskSize = 1024;
-            buildVMMemorySize = 1024;
           };
 
         makePostgres = version: (rec {
