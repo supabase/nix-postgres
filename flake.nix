@@ -12,7 +12,12 @@
       system.aarch64-linux
     ]; in flake-utils.lib.eachSystem ourSystems (system:
       let
-        pkgs = import nixpkgs { inherit system; };
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [
+            (import ./overlays/cargo-pgrx.nix)
+          ];
+        };
 
         # FIXME (aseipp): pg_prove is yet another perl program that needs
         # LOCALE_ARCHIVE set in non-NixOS environments. upstream this.
@@ -135,7 +140,9 @@
           '';
 
       in rec {
-        packages = flake-utils.lib.flattenTree basePackages;
+        packages = flake-utils.lib.flattenTree basePackages // {
+          inherit (pkgs) cargo-pgrx_0_9_7;
+        };
 
         checks = {
           psql_14 = makeCheckHarness basePackages.psql_14.bin;
