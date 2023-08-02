@@ -181,4 +181,4 @@ well...
 
 ## Next page
 
-Not Invented Here.
+Next up: **[02 &mdash; Install `direnv`](./02-INSTALL-DIRENV.md)**

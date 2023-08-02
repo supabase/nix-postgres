@@ -10,3 +10,5 @@ probably other stuff to help educate you.
   and play around with it a little.
 - **[01 &mdash; Use this Repository](./01-USE-THIS-REPO.md)** &mdash; We'll
   build a PostreSQL distribution, and also use the magical `nix develop`
+- **[02 &mdash; Install `direnv`](./02-INSTALL-DIRENV.md)** &mdash; Using
+  `direnv`, you can activate your development shell "transparently" on demand.
