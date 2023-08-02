@@ -6,5 +6,7 @@ probably other stuff to help educate you.
 
 ## Table of Contents
 
-- **[00 — Starting Line](./00-START-HERE.md)** — we'll install Nix and play
-  around with it a little.
+- **[00 &mdash; Starting Line](./00-START-HERE.md)** &mdash; we'll install Nix
+  and play around with it a little.
+- **[01 &mdash; Use this Repository](./01-USE-THIS-REPO.md)** &mdash; We'll
+  build a PostreSQL distribution, and also use the magical `nix develop`
