@@ -4,3 +4,4 @@ result*
 # direnv
 .envrc
 .direnv
+*.swp
