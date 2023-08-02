@@ -8,8 +8,10 @@
 
   outputs = { self, nixpkgs, flake-utils }:
     let ourSystems = with flake-utils.lib; [
-      system.x86_64-linux
+      system.aarch64-darwin
       system.aarch64-linux
+      system.x86_64-darwin
+      system.x86_64-linux
     ]; in flake-utils.lib.eachSystem ourSystems (system:
       let
         pkgs = import nixpkgs { inherit system; };
