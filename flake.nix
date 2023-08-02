@@ -14,6 +14,16 @@
       let
         pkgs = import nixpkgs { inherit system; };
 
+        pg_prove = pkgs.runCommand "pg_prove" {
+          nativeBuildInputs = [ pkgs.makeWrapper ];
+        } ''
+          mkdir -p $out/bin
+          for x in pg_prove pg_tapgen; do
+            makeWrapper "${pkgs.perlPackages.TAPParserSourceHandlerpgTAP}/bin/$x" "$out/bin/$x" \
+              --set LOCALE_ARCHIVE "${pkgs.glibcLocales}/lib/locale/locale-archive"
+          done
+        '';
+
         psqlExtensions = [
           "postgis"
           "pgrouting"
@@ -105,6 +115,7 @@
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
             coreutils just nix-update
+            pg_prove
           ];
         };
       }
