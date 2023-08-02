@@ -14,6 +14,8 @@
       let
         pkgs = import nixpkgs { inherit system; };
 
+        # FIXME (aseipp): pg_prove is yet another perl program that needs
+        # LOCALE_ARCHIVE set in non-NixOS environments. upstream this.
         pg_prove = pkgs.runCommand "pg_prove" {
           nativeBuildInputs = [ pkgs.makeWrapper ];
         } ''
