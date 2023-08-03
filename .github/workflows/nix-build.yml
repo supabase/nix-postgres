@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ self-hosted, ubuntu-latest ]
+        os: [ ubuntu-latest ]
         cmd: [ "nix flake check -L --show-trace", "nix run nixpkgs#just -- build-all" ]
     runs-on: ${{ matrix.os }}
     name: nix-build
