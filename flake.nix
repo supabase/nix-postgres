@@ -116,6 +116,7 @@
             export PGDATA=/tmp/pgdata
             mkdir -p $PGDATA
             initdb --locale=C
+            cp ${./tests/postgresql.conf} $PGDATA/postgresql.conf
             postgres -k /tmp >logfile 2>&1 &
             sleep 2
 
