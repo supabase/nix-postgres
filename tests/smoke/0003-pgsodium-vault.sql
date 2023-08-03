@@ -1,8 +1,5 @@
 BEGIN;
 
-CREATE EXTENSION IF NOT EXISTS pgtap;
-CREATE EXTENSION IF NOT EXISTS supabase_vault CASCADE;
-
 select plan(4);
 
 select id as test_new_key_id from pgsodium.create_key(name:='test_new_key') \gset

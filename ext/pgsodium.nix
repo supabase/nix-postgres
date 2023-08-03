@@ -2,7 +2,7 @@
 
 stdenv.mkDerivation rec {
   pname = "pgsodium";
-  version = "3.1.0";
+  version = "3.1.8";
 
   buildInputs = [ libsodium postgresql ];
 
