@@ -111,12 +111,15 @@
           let
             sqlTests = ./tests/smoke;
           in pkgs.runCommand "postgres-${pgpkg.version}-check-harness" {
-            nativeBuildInputs = [ pgpkg pg_prove pkgs.procps ];
+            nativeBuildInputs = with pkgs; [ coreutils bash pgpkg pg_prove procps ];
           } ''
             export PGDATA=/tmp/pgdata
             mkdir -p $PGDATA
             initdb --locale=C
-            cp ${./tests/postgresql.conf} $PGDATA/postgresql.conf
+
+            substitute ${./tests/postgresql.conf} $PGDATA/postgresql.conf \
+              --subst-var-by PGSODIUM_GETKEY_SCRIPT "${./tests/util/pgsodium_getkey.sh}"
+
             postgres -k /tmp >logfile 2>&1 &
             sleep 2
 

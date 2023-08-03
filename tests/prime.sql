@@ -4,7 +4,7 @@ CREATE EXTENSION postgis;
 CREATE EXTENSION pgrouting;
 CREATE EXTENSION pgcrypto;
 CREATE EXTENSION pgsodium;
--- CREATE EXTENSION supabase_vault;
+CREATE EXTENSION supabase_vault CASCADE;
 
 CREATE EXTENSION pgjwt;
 CREATE EXTENSION plpgsql_check;
