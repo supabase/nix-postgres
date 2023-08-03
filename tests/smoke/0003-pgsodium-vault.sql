@@ -1,6 +1,6 @@
 BEGIN;
 
-select plan(4);
+select plan(3);
 
 select id as test_new_key_id from pgsodium.create_key(name:='test_new_key') \gset
 
