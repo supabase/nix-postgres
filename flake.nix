@@ -63,12 +63,13 @@
           ./ext/hypopg.nix
           ./ext/pg_tle.nix
           ./ext/wrappers/default.nix
+          ./ext/supautils.nix
         ];
 
         makePostgresPkgs = version:
           let postgresql = pkgs."postgresql_${version}";
           in map (path: pkgs.callPackage path { inherit postgresql; }) ourExtensions;
-        
+
         makePostgresPkgsSet = version:
           (builtins.listToAttrs (map (drv:
             { name = drv.pname; value = drv; }
