@@ -10,7 +10,7 @@ stdenv.mkDerivation rec {
     owner  = "michelp";
     repo   = pname;
     rev    = "refs/tags/v${version}";
-    hash   = "sha256-kD7K5la7DNBe+JI1C/5E3AJdl0lRcWbxFizQqvToPnc=";
+    hash   = "sha256-j5F1PPdwfQRbV8XJ8Mloi8FvZF0MTl4eyIJcBYQy1E4=";
   };
 
   installPhase = ''
