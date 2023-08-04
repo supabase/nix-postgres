@@ -6,8 +6,10 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
-    let ourSystems = with flake-utils.lib; [
+  outputs = { self, nixpkgs, flake-utils }: let
+    gitRev = "vcs=${self.shortRev or "dirty"}+${builtins.substring 0 8 (self.lastModifiedDate or self.lastModified or "19700101")}";
+
+    ourSystems = with flake-utils.lib; [
       system.x86_64-linux
       system.aarch64-linux
     ]; in flake-utils.lib.eachSystem ourSystems (system:
@@ -66,6 +68,20 @@
           ./ext/supautils.nix
         ];
 
+        makeReceipt = pgbin: upstreamExts: ourExts: pkgs.writeTextFile {
+          name = "receipt";
+          destination = "/receipt.json";
+          text = builtins.toJSON {
+            revision = gitRev;
+            psql-version = pgbin.version;
+            nixpkgs = {
+              revision = nixpkgs.rev;
+              extensions = upstreamExts;
+            };
+            extensions = ourExts;
+          };
+        };
+
         makePostgresPkgs = version:
           let postgresql = pkgs."postgresql_${version}";
           in map (path: pkgs.callPackage path { inherit postgresql; }) ourExtensions;
@@ -77,10 +93,21 @@
           // { recurseForDerivations = true; };
 
         makePostgresBin = version:
-          let postgresql = pkgs."postgresql_${version}";
-          in postgresql.withPackages (ps:
-            (map (ext: ps."${ext}") psqlExtensions) ++ (makePostgresPkgs version)
-          );
+          let
+            postgresql = pkgs."postgresql_${version}";
+            upstreamExts = map (ext: {
+              name = postgresql.pkgs."${ext}".pname;
+              version = postgresql.pkgs."${ext}".version;
+            }) psqlExtensions;
+            ourExts = map (ext: { name = ext.pname; version = ext.version; }) (makePostgresPkgs version);
+
+            pgbin = postgresql.withPackages (ps:
+              (map (ext: ps."${ext}") psqlExtensions) ++ (makePostgresPkgs version)
+            );
+          in pkgs.symlinkJoin {
+            inherit (pgbin) name;
+            paths = [ pgbin (makeReceipt pgbin upstreamExts ourExts) ];
+          };
 
         makePostgresDocker = version: binPackage:
           pkgs.dockerTools.buildLayeredImage {
