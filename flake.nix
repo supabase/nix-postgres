@@ -105,7 +105,7 @@
               (map (ext: ps."${ext}") psqlExtensions) ++ (makePostgresPkgs version)
             );
           in pkgs.symlinkJoin {
-            inherit (pgbin) name;
+            inherit (pgbin) name version;
             paths = [ pgbin (makeReceipt pgbin upstreamExts ourExts) ];
           };
 
