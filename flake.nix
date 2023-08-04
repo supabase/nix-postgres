@@ -43,7 +43,7 @@
           "timescaledb"
           "wal2json"
           /* pljava */
-          /* plv8 -- FIXME (aseipp): nixos/nixpkgs#246702 */
+          "plv8"
           "rum"
           "pgvector"
           "pg_repack"

@@ -8,7 +8,7 @@ CREATE EXTENSION supabase_vault;
 
 CREATE EXTENSION pgjwt;
 CREATE EXTENSION plpgsql_check;
--- CREATE EXTENSION plv8; FIXME (aseipp): nixos/nixpkgs#246702
+CREATE EXTENSION plv8;
 CREATE EXTENSION rum;
 CREATE EXTENSION vector;
 CREATE EXTENSION pg_repack;
