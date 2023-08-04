@@ -13,26 +13,17 @@ else
     exit 1
 fi
 
-# now, the second argument needs to be a directory which we'll store
-# all the data in (we don't do it ourselves or blow it away after, in
-# case people want to manually do more work with it)
-if [ -z "$2" ]; then
-    echo "Please provide a directory to store the data in"
-    exit
-fi
+PORTNO="${2:-5432}"
+DATDIR=$(mktemp -d)
+mkdir -p "$DATDIR"
 
-# if the directory $2 exists, then warn the user and bail
-if [ -d "$2" ]; then
-    echo "Directory $2 already exists, please remove it first"
-    exit 1
-fi
-
+echo "NOTE: using port $PORTNO for server"
+echo "NOTE: using temporary directory $DATDIR for data, which will not be removed"
+echo "NOTE: you are free to re-use this data directory at will"
+echo 
 
 BINDIR=$(nix build --quiet --no-link --print-out-paths .#"psql_$1/bin")
+export PATH=$BINDIR/bin:$PATH
 
-mkdir "$2"
-$BINDIR/bin/initdb -D "$2" --locale=C
-
-# -k /tmp will make sure the socket file goes to /tmp instead of /run/postgres,
-# which probably doesn't exist or is owned by systemd
-exec $BINDIR/bin/postgres -D "$2" -k /tmp
+initdb -D "$DATDIR" --locale=C
+exec postgres -p "$PORTNO" -D "$DATDIR" -k /tmp
