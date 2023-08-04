@@ -106,6 +106,9 @@
         basePackages = {
           psql_14 = makePostgres "14";
           psql_15 = makePostgres "15";
+          
+          start-server = pkgs.writeShellScriptBin "start-postgres-server" (builtins.readFile ./tools/run-server.sh);
+          start-client = pkgs.writeShellScriptBin "start-postgres-client" (builtins.readFile ./tools/run-client.sh);
         };
 
         makeCheckHarness = pgpkg:
@@ -148,8 +151,8 @@
             coreutils just nix-update
             pg_prove shellcheck
 
-            (writeShellScriptBin "start-postgres-server" (builtins.readFile ./tools/run-server.sh))
-            (writeShellScriptBin "start-postgres-client" (builtins.readFile ./tools/run-client.sh))
+            basePackages.start-server
+            basePackages.start-client
           ];
         };
       }
