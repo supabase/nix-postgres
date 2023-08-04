@@ -142,7 +142,12 @@
             chmod +x $out/bin/start-postgres-server
           '';
 
-          start-client = pkgs.writeShellScriptBin "start-postgres-client" (builtins.readFile ./tools/run-client.sh);
+          start-client = pkgs.runCommand "start-postgres-client" {} ''
+            mkdir -p $out/bin
+            substitute ${./tools/run-client.sh} $out/bin/start-postgres-client \
+              --replace 'PSQL14=' 'PSQL14=${basePackages.psql_14.bin} #'
+            chmod +x $out/bin/start-postgres-client
+          '';
         };
 
         makeCheckHarness = pgpkg:
