@@ -146,7 +146,7 @@
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
             coreutils just nix-update
-            pg_prove
+            pg_prove shellcheck
 
             (writeShellScriptBin "start-postgres-server" (builtins.readFile ./tools/run-server.sh))
             (writeShellScriptBin "start-postgres-client" (builtins.readFile ./tools/run-server.sh))
