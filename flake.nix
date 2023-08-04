@@ -146,6 +146,18 @@
           psql_15 = makeCheckHarness basePackages.psql_15.bin;
         };
 
+        apps = {
+          start-server = {
+            type = "app";
+            program = "${basePackages.start-server}/bin/start-postgres-server";
+          };
+
+          start-client = {
+            type = "app";
+            program = "${basePackages.start-client}/bin/start-postgres-client";
+          };
+        };
+
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
             coreutils just nix-update
