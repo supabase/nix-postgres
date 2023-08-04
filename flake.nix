@@ -107,7 +107,14 @@
           psql_14 = makePostgres "14";
           psql_15 = makePostgres "15";
           
-          start-server = pkgs.writeShellScriptBin "start-postgres-server" (builtins.readFile ./tools/run-server.sh);
+          start-server = pkgs.runCommand "start-postgres-server" {} ''
+            mkdir -p $out/bin
+            substitute ${./tools/run-server.sh} $out/bin/start-postgres-server \
+              --replace 'PSQL14=' 'PSQL14=${basePackages.psql_14.bin} #' \
+              --replace 'PSQL15=' 'PSQL15=${basePackages.psql_15.bin} #'
+            chmod +x $out/bin/start-postgres-server
+          '';
+
           start-client = pkgs.writeShellScriptBin "start-postgres-client" (builtins.readFile ./tools/run-client.sh);
         };
 
