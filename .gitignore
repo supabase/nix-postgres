@@ -5,3 +5,6 @@ result*
 .envrc
 .direnv
 *.swp
+
+# left around by pg_upgrade
+/delete_old_cluster.sh
