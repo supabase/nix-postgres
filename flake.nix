@@ -173,13 +173,43 @@
 
         # Make a Docker Image from a given PostgreSQL version and binary package.
         makePostgresDocker = version: binPackage:
-          pkgs.dockerTools.buildLayeredImage {
+          let
+            initScript = pkgs.runCommand "docker-init.sh" {} ''
+              mkdir -p $out/bin
+              cp ${./docker/init.sh} $out/bin/init.sh
+              chmod +x $out/bin/init.sh
+            '';
+
+            postgresqlConfig = pkgs.runCommand "postgresql.conf" {} ''
+              mkdir -p $out/etc/
+              substitute ${./tests/postgresql.conf.in} $out/etc/postgresql.conf \
+                --subst-var-by PGSODIUM_GETKEY_SCRIPT "${./tests/util/pgsodium_getkey.sh}"
+            '';
+
+          in pkgs.dockerTools.buildImage {
             name = "postgresql-${version}";
             tag = "latest";
-            contents = with pkgs; [ coreutils bash binPackage ];
+
+            runAsRoot = ''
+              #!${pkgs.runtimeShell}
+              ${pkgs.dockerTools.shadowSetup}
+              groupadd -r postgres
+              useradd -r -g postgres postgres
+              mkdir -p /data /run/postgresql
+              chown postgres:postgres /data /run/postgresql
+            '';
+
+            copyToRoot = pkgs.buildEnv {
+              name = "image-root";
+              paths = with pkgs; [
+                initScript coreutils bash binPackage
+                dockerTools.binSh sudo postgresqlConfig
+              ];
+              pathsToLink = [ "/bin" "/etc" "/var" "/share" ];
+            };
 
             config = {
-              Cmd = [ "/bin/postgres" ];
+              Cmd = [ "/bin/init.sh" ];
               ExposedPorts = { "5432/tcp" = {}; };
               WorkingDir = "/data";
               Volumes = { "/data" = { }; };
