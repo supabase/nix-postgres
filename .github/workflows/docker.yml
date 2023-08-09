@@ -33,8 +33,8 @@ jobs:
           set -x
           for x in 14 15; do
             docker load -i result-docker-$x
-            docker tag postgres-$x:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$x:${GITHUB_SHA}
-            docker tag postgres-$x:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$x:latest
+            docker tag postgresql-$x:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$x:${GITHUB_SHA}
+            docker tag postgresql-$x:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$x:latest
           done
 
       - name: Log in to the Container registry
