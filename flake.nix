@@ -133,7 +133,7 @@
         basePackages = {
           psql_14 = makePostgres "14";
           psql_15 = makePostgres "15";
-          
+
           start-server = pkgs.runCommand "start-postgres-server" {} ''
             mkdir -p $out/bin
             substitute ${./tools/run-server.sh} $out/bin/start-postgres-server \
@@ -148,6 +148,25 @@
               --replace 'PSQL14=' 'PSQL14=${basePackages.psql_14.bin} #'
             chmod +x $out/bin/start-postgres-client
           '';
+
+          migrate-tool =
+            let
+              configFile = ./tests/postgresql.conf;
+              getkeyScript = ./tests/util/pgsodium_getkey.sh;
+              primingScript = ./tests/prime.sql;
+              migrationData = ./tests/migrations/data.sql;
+            in pkgs.runCommand "migrate-postgres" {} ''
+              mkdir -p $out/bin
+              substitute ${./tools/migrate-pgupgrade.sh} $out/bin/migrate-postgres \
+                --replace 'PSQL14=' 'PSQL14=${basePackages.psql_14.bin} #' \
+                --replace 'PSQL15=' 'PSQL15=${basePackages.psql_15.bin} #' \
+                --replace 'PSQL_CONF_FILE=' 'PSQL_CONF_FILE=${configFile} #' \
+                --replace 'PGSODIUM_GETKEY_SCRIPT=' 'PGSODIUM_GETKEY_SCRIPT=${getkeyScript} #' \
+                --replace 'PRIMING_SCRIPT=' 'PRIMING_SCRIPT=${primingScript} #' \
+                --replace 'MIGRATION_DATA=' 'MIGRATION_DATA=${migrationData} #'
+
+              chmod +x $out/bin/migrate-postgres
+            '';
         };
 
         makeCheckHarness = pgpkg:
@@ -194,6 +213,11 @@
           start-client = {
             type = "app";
             program = "${basePackages.start-client}/bin/start-postgres-client";
+          };
+
+          migration-test = {
+            type = "app";
+            program = "${basePackages.migrate-tool}/bin/migrate-postgres";
           };
         };
 
