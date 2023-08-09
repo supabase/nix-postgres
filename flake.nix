@@ -228,6 +228,7 @@
 
             basePackages.start-server
             basePackages.start-client
+            basePackages.migrate-tool
           ];
         };
       }
