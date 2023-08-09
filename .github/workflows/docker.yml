@@ -1,0 +1,53 @@
+name: Docker
+
+on:
+  push:
+    branches: [ 'main' ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build:
+    name: "update: build and deploy postgres server images"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+        with:
+          fetch-depth: 0
+      - uses: DeterminateSystems/nix-installer-action@65d7c888b2778e8cf30a07a88422ccb23499bfb8
+      - uses: DeterminateSystems/magic-nix-cache-action@749fc5bbc9fa49d60c2b93f6c4bc867b82e1d295
+      - uses: actions/checkout@v3
+
+      - name: Build images
+        run: |
+          nix build .#psql_14/docker -o result-docker-14
+          nix build .#psql_15/docker -o result-docker-15
+
+      - name: Tag images
+        run: |
+          set -x
+          for x in 14 15; do
+            docker load -i result-docker-$x
+            docker tag postgres-$x:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$x:${GITHUB_SHA}
+            docker tag postgres-$x:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$x:latest
+          done
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a # v2.1.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push image to the Container registry
+        run: |
+          set -x
+          for x in 14 15; do
+            docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$x:${GITHUB_SHA}
+            docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$x:latest
+          done
