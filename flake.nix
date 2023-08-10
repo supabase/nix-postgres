@@ -84,7 +84,7 @@
             # force a rebuild of the psql packages) but also to helpfully inform
             # tools what version of the schema is being used, for forwards and
             # backwards compatibility
-            schema-version = "1";
+            receipt-version = "1";
           };
         };
 
