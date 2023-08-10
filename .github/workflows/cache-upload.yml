@@ -30,7 +30,14 @@ jobs:
           role-to-assume: ${{ secrets.DEV_AWS_ROLE }}
           aws-region: "us-east-1"
 
-      - name: build and copy
+      - name: write secret key
+        # use python so we don't interpolate the secret into the workflow logs, in case of bugs
         run: |
-          nix build .
-          nix copy --to s3://nix-postgres-artifacts ./result*
+          python -c "import os; file = open('nix-secret-key', 'w'); file.write(os.environ['NIX_SIGN_SECRET_KEY']); file.close()"
+
+      - name: build and copy to S3
+        run: |
+          for x in 14 15; do
+            nix build .#psql_$x/bin -o result-$x
+          done
+          nix copy --to s3://nix-postgres-artifacts?secret-key=nix-secret-key ./result*
