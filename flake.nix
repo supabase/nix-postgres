@@ -163,7 +163,7 @@
               migrationData = ./tests/migrations/data.sql;
             in pkgs.runCommand "migrate-postgres" {} ''
               mkdir -p $out/bin
-              substitute ${./tools/migrate-pgupgrade.sh} $out/bin/migrate-postgres \
+              substitute ${./tools/migrate-tool.sh} $out/bin/migrate-postgres \
                 --replace 'PSQL14=' 'PSQL14=${basePackages.psql_14.bin} #' \
                 --replace 'PSQL15=' 'PSQL15=${basePackages.psql_15.bin} #' \
                 --replace 'PSQL_CONF_FILE=' 'PSQL_CONF_FILE=${configFile} #' \
