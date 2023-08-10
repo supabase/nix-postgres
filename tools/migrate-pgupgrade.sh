@@ -21,12 +21,12 @@ else
 fi
 
 # second argument is the new version; 14 or 15
-if [[ $1 == /nix/store* ]]; then
-    if [ ! -L "$1/receipt.json" ] || [ ! -e "$1/receipt.json" ]; then
+if [[ $2 == /nix/store* ]]; then
+    if [ ! -L "$2/receipt.json" ] || [ ! -e "$2/receipt.json" ]; then
         echo "ERROR: $1 does not look like a valid Postgres install"
         exit 1
     fi
-    NEWVER="$1"
+    NEWVER="$2"
 elif [ "$2" == "14" ]; then
     PSQL14=$(nix build --quiet --no-link --print-out-paths .#"psql_14/bin")
     NEWVER="$PSQL14"
