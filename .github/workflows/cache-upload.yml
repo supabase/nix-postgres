@@ -1,4 +1,4 @@
-name: CI
+name: Cache upload
 
 on:
   push:
