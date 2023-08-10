@@ -79,6 +79,12 @@
               extensions = upstreamExts;
             };
             extensions = ourExts;
+
+            # NOTE (aseipp): this field can be used to do cache busting (e.g.
+            # force a rebuild of the psql packages) but also to helpfully inform
+            # tools what version of the schema is being used, for forwards and
+            # backwards compatibility
+            schema-version = "1";
           };
         };
 
