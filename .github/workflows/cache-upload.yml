@@ -34,6 +34,8 @@ jobs:
         # use python so we don't interpolate the secret into the workflow logs, in case of bugs
         run: |
           python -c "import os; file = open('nix-secret-key', 'w'); file.write(os.environ['NIX_SIGN_SECRET_KEY']); file.close()"
+        env:
+          NIX_SIGN_SECRET_KEY: ${{ secrets.NIX_SIGN_SECRET_KEY }}
 
       - name: build and copy to S3
         run: |
