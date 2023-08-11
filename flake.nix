@@ -14,15 +14,23 @@
       system.aarch64-linux
     ]; in flake-utils.lib.eachSystem ourSystems (system:
       let
+        # The 'pkgs' variable holds all the upstream packages in nixpkgs, which
+        # we can use to build our own images; it is the common name to refer to
+        # a copy of nixpkgs which contains all its packages.
         pkgs = import nixpkgs {
           inherit system;
           overlays = [
+            # NOTE (aseipp): add any needed overlays here. in theory we could
+            # pull them from the overlays/ directory automatically, but we don't
+            # want to have an arbitrary order, since it might matter. being
+            # explicit is better.
             (import ./overlays/cargo-pgrx.nix)
           ];
         };
 
         # FIXME (aseipp): pg_prove is yet another perl program that needs
-        # LOCALE_ARCHIVE set in non-NixOS environments. upstream this.
+        # LOCALE_ARCHIVE set in non-NixOS environments. upstream this. once that's done, we
+        # can remove this wrapper.
         pg_prove = pkgs.runCommand "pg_prove" {
           nativeBuildInputs = [ pkgs.makeWrapper ];
         } ''
@@ -33,6 +41,10 @@
           done
         '';
 
+        # Our list of PostgreSQL extensions which come from upstream Nixpkgs.
+        # These are maintained upstream and can easily be used here just by
+        # listing their name. Anytime the version of nixpkgs is upgraded, these
+        # may also bring in new versions of the extensions.
         psqlExtensions = [
           "postgis"
           "pgrouting"
@@ -52,6 +64,15 @@
           "pgroonga"
         ];
 
+        # Custom extensions that exist in our repository. These aren't upstream
+        # either because nobody has done the work, maintaining them here is
+        # easier and more expedient, or because they may not be suitable, or are
+        # too niche/one-off.
+        #
+        # Ideally, most of these should have copies upstream for third party
+        # use, but even if they did, keeping our own copies means that we can
+        # rollout new versions of these critical things easier without having to
+        # go through the upstream release engineering process.
         ourExtensions = [
           ./ext/pgsql-http.nix
           ./ext/pg_plan_filter.nix
@@ -68,6 +89,22 @@
           ./ext/supautils.nix
         ];
 
+        # Create a 'receipt' file for a given postgresql package. This is a way
+        # of adding a bit of metadata to the package, which can be used by other
+        # tools to inspect what the contents of the install are: the PSQL
+        # version, the installed extensions, et cetera.
+        #
+        # This takes three arguments:
+        #  - pgbin: the postgresql package we are building on top of
+        #  - upstreamExts: the list of extensions from upstream nixpkgs. This is
+        #    not a list of packages, but an attrset containing extension names
+        #    mapped to versions.
+        #  - ourExts: the list of extensions from upstream nixpkgs. This is not
+        #    a list of packages, but an attrset containing extension names
+        #    mapped to versions.
+        #
+        # The output is a package containing the receipt.json file, which can be
+        # merged with the PostgreSQL installation using 'symlinkJoin'.
         makeReceipt = pgbin: upstreamExts: ourExts: pkgs.writeTextFile {
           name = "receipt";
           destination = "/receipt.json";
@@ -88,16 +125,25 @@
           };
         };
 
-        makePostgresPkgs = version:
+        makeOurPostgresPkgs = version:
           let postgresql = pkgs."postgresql_${version}";
           in map (path: pkgs.callPackage path { inherit postgresql; }) ourExtensions;
 
-        makePostgresPkgsSet = version:
+        # Create an attrset that contains all the extensions included in a server.
+        makeOurPostgresPkgsSet = version:
           (builtins.listToAttrs (map (drv:
             { name = drv.pname; value = drv; }
-          ) (makePostgresPkgs version)))
+          ) (makeOurPostgresPkgs version)))
           // { recurseForDerivations = true; };
 
+        # Create a binary distribution of PostgreSQL, given a version.
+        #
+        # NOTE: The version here does NOT refer to the exact PostgreSQL version;
+        # it refers to the *major number only*, which is used to select the
+        # correct version of the package from nixpkgs. This is because we want
+        # to be able to do so in an open ended way. As an example, the version
+        # "14" passed in will use the nixpkgs package "postgresql_14" as the
+        # basis for building extensions, etc.
         makePostgresBin = version:
           let
             postgresql = pkgs."postgresql_${version}";
@@ -105,19 +151,20 @@
               name = postgresql.pkgs."${ext}".pname;
               version = postgresql.pkgs."${ext}".version;
             }) psqlExtensions;
-            ourExts = map (ext: { name = ext.pname; version = ext.version; }) (makePostgresPkgs version);
+            ourExts = map (ext: { name = ext.pname; version = ext.version; }) (makeOurPostgresPkgs version);
 
             pgbin = postgresql.withPackages (ps:
-              (map (ext: ps."${ext}") psqlExtensions) ++ (makePostgresPkgs version)
+              (map (ext: ps."${ext}") psqlExtensions) ++ (makeOurPostgresPkgs version)
             );
           in pkgs.symlinkJoin {
             inherit (pgbin) name version;
             paths = [ pgbin (makeReceipt pgbin upstreamExts ourExts) ];
           };
 
-        makePostgresDocker = version: binPackage:
+        # Make a Docker Image from a given PostgreSQL version and binary package.
+        makePostgresDocker = binPackage:
           pkgs.dockerTools.buildLayeredImage {
-            name = "postgresql-${version}";
+            name = "postgresql-${binPackage.version}";
             tag = "latest";
             contents = with pkgs; [ coreutils bash binPackage ];
 
@@ -129,17 +176,35 @@
             };
           };
 
-        makePostgres = version: (rec {
+        # Create an attribute set, containing all the relevant packages for a
+        # PostgreSQL install, wrapped up with a bow on top. There are three
+        # packages:
+        #
+        #  - bin: the postgresql package itself, with all the extensions
+        #    installed, and a receipt.json file containing metadata about the
+        #    install.
+        #  - exts: an attrset containing all the extensions, mapped to their
+        #    package names.
+        #  - docker: a docker image containing the postgresql package, with all
+        #    the extensions installed, and a receipt.json file containing
+        #    metadata about the install.
+        makePostgres = version: rec {
           bin = makePostgresBin version;
-          exts = makePostgresPkgsSet version;
-          docker = makePostgresDocker version bin;
+          exts = makeOurPostgresPkgsSet version;
+          docker = makePostgresDocker bin;
           recurseForDerivations = true;
-        });
+        };
 
+        # The base set of packages that we export from this Nix Flake, that can
+        # be used with 'nix build'. Don't use the names listed below; check the
+        # name in 'nix flake show' in order to make sure exactly what name you
+        # want.
         basePackages = {
+          # PostgreSQL versions.
           psql_14 = makePostgres "14";
           psql_15 = makePostgres "15";
 
+          # Start a version of the server.
           start-server = pkgs.runCommand "start-postgres-server" {} ''
             mkdir -p $out/bin
             substitute ${./tools/run-server.sh} $out/bin/start-postgres-server \
@@ -148,6 +213,7 @@
             chmod +x $out/bin/start-postgres-server
           '';
 
+          # Start a version of the client.
           start-client = pkgs.runCommand "start-postgres-client" {} ''
             mkdir -p $out/bin
             substitute ${./tools/run-client.sh} $out/bin/start-postgres-client \
@@ -155,6 +221,7 @@
             chmod +x $out/bin/start-postgres-client
           '';
 
+          # Migrate between two data directories.
           migrate-tool =
             let
               configFile = ./tests/postgresql.conf;
@@ -175,6 +242,8 @@
             '';
         };
 
+        # Create a testing harness for a PostgreSQL package. This is used for
+        # 'nix flake check', and works with any PostgreSQL package you hand it.
         makeCheckHarness = pgpkg:
           let
             sqlTests = ./tests/smoke;
@@ -201,32 +270,43 @@
           '';
 
       in rec {
+        # The list of all packages that can be built with 'nix build'. The list
+        # of names that can be used can be shown with 'nix flake show'
         packages = flake-utils.lib.flattenTree basePackages // {
-          inherit (pkgs) cargo-pgrx_0_9_7;
+          # Any extra packages we might want to include in our package
+          # set can go here.
+          inherit (pkgs)
+            # NOTE: comes from our cargo-pgrx.nix overlay
+            cargo-pgrx_0_9_7
+            ;
         };
 
+        # The list of exported 'checks' that are run with every run of 'nix
+        # flake check'. This is run in the CI system, as well.
         checks = {
           psql_14 = makeCheckHarness basePackages.psql_14.bin;
           psql_15 = makeCheckHarness basePackages.psql_15.bin;
         };
 
-        apps = {
-          start-server = {
-            type = "app";
-            program = "${basePackages.start-server}/bin/start-postgres-server";
-          };
-
-          start-client = {
-            type = "app";
-            program = "${basePackages.start-client}/bin/start-postgres-client";
-          };
-
-          migration-test = {
-            type = "app";
-            program = "${basePackages.migrate-tool}/bin/migrate-postgres";
-          };
+        # Apps is a list of names of things that can be executed with 'nix run';
+        # these are distinct from the things that can be built with 'nix build',
+        # so they need to be listed here too.
+        apps =
+          let
+            mkApp = attrName: binName: {
+              type = "app";
+              program = "${basePackages."${attrName}"}/bin/${binName}";
+            };
+          in {
+          start-server = mkApp "start-server" "start-postgres-server";
+          start-client = mkApp "start-client" "start-postgres-client";
+          migration-test = mkApp "migrate-tool" "migrate-postgres";
         };
 
+        # 'devShells.default' lists the set of packages that are included in the
+        # ambient $PATH environment when you run 'nix develop'. This is useful
+        # for development and puts many convenient devtools instantly within
+        # reach.
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
             coreutils just nix-update
