@@ -35,6 +35,7 @@
             # want to have an arbitrary order, since it might matter. being
             # explicit is better.
             (import ./overlays/cargo-pgrx.nix)
+            (import ./overlays/gdal-small.nix)
           ];
         };
 
