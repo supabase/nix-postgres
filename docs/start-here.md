@@ -1,5 +1,3 @@
-# 00 &mdash; Starting Line: installing Nix and playing around
-
 Let's go ahead and install Nix. To do that, we'll use the
 **[nix-installer tool]** by Determinate Systems. This works on many platforms,
 but most importantly it works on **aarch64 Linux** and **x86_64 Linux**. Use the
