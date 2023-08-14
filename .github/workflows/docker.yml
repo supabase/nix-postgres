@@ -13,9 +13,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner: [ X64, arm-runner ]
+        runner: [ "X64", "arm-runner" ]
     name: "update: build and deploy postgres server images"
-    runs-on: [ self-hosted, ${{ matrix.runner }} ]
+    runs-on: [ self-hosted, "${{ matrix.runner }}" ]
     permissions:
       contents: read
       packages: write
