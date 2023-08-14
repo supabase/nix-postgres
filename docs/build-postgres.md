@@ -176,5 +176,5 @@ Done! As you can see, `nix develop .` will just drop you in a subshell with
 tools you need _ready to go instantly_. That's all you need to do! And once that
 shell goes away, `just` will be removed from your `$PATH` as well.
 
-There's an even easier way to do this that is completely transparent to you, as
-well...
+There's an even easier way to do this
+[that is completely transparent to you, as well](./use-direnv.md).
