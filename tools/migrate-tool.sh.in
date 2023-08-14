@@ -105,7 +105,7 @@ fi
 if [ "$UPGRADE_METHOD" == "pg_dumpall" ]; then
     SQLDAT="$DATDIR/dump.sql"
     echo "NOTE: Exporting data via pg_dumpall ($SQLDAT)"
-    $OLDVER/bin/pg_dumpall -h localhost > "$SQLDAT"
+    $NEWVER/bin/pg_dumpall -h localhost > "$SQLDAT"
 
     echo "NOTE: Stopping old server (v${1}) to prepare for migration"
     $OLDVER/bin/pg_ctl stop -D "$DATDIR"
