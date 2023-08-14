@@ -10,10 +10,10 @@ if [[ $1 == /nix/store* ]]; then
     fi
     OLDVER="$1"
 elif [ "$1" == "14" ]; then
-    PSQL14=$(nix build --quiet --no-link --print-out-paths .#"psql_14/bin")
+    PSQL14=@PSQL14_BINDIR@
     OLDVER="$PSQL14"
 elif [ "$1" == "15" ]; then
-    PSQL15=$(nix build --quiet --no-link --print-out-paths .#"psql_15/bin")
+    PSQL15=@PSQL15_BINDIR@
     OLDVER="$PSQL15"
 else
     echo "Please provide a valid Postgres version (14 or 15), or a /nix/store path"
@@ -28,10 +28,10 @@ if [[ $2 == /nix/store* ]]; then
     fi
     NEWVER="$2"
 elif [ "$2" == "14" ]; then
-    PSQL14=$(nix build --quiet --no-link --print-out-paths .#"psql_14/bin")
+    PSQL14=@PSQL14_BINDIR@
     NEWVER="$PSQL14"
 elif [ "$2" == "15" ]; then
-    PSQL15=$(nix build --quiet --no-link --print-out-paths .#"psql_15/bin")
+    PSQL15=@PSQL15_BINDIR@
     NEWVER="$PSQL15"
 else
     echo "Please provide a valid Postgres version (14 or 15), or a /nix/store path"
@@ -62,8 +62,8 @@ $OLDVER/bin/initdb -D "$DATDIR" --locale=C
 $NEWVER/bin/initdb -D "$NEWDAT" --locale=C
 
 # NOTE (aseipp): we need to patch postgresql.conf to have the right pgsodium_getkey script
-PSQL_CONF_FILE=$PWD/tests/postgresql.conf
-PGSODIUM_GETKEY_SCRIPT=$PWD/tests/util/pgsodium_getkey.sh
+PSQL_CONF_FILE=@PSQL_CONF_FILE@
+PGSODIUM_GETKEY_SCRIPT=@PGSODIUM_GETKEY@
 echo "NOTE: patching postgresql.conf files"
 for x in "$DATDIR" "$NEWDAT"; do
   sed \
@@ -74,8 +74,8 @@ done
 echo "NOTE: Starting first server (v${1}) to load data into the system"
 $OLDVER/bin/pg_ctl start -D "$DATDIR"
 
-PRIMING_SCRIPT=$PWD/tests/prime.sql
-MIGRATION_DATA=$PWD/tests/migrations/data.sql
+PRIMING_SCRIPT=@PRIMING_SCRIPT@
+MIGRATION_DATA=@MIGRATION_DATA@
 
 $OLDVER/bin/psql -h localhost -d postgres -Xf "$PRIMING_SCRIPT"
 $OLDVER/bin/psql -h localhost -d postgres -Xf "$MIGRATION_DATA"

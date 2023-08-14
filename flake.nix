@@ -217,36 +217,37 @@
           # Start a version of the server.
           start-server = pkgs.runCommand "start-postgres-server" {} ''
             mkdir -p $out/bin
-            substitute ${./tools/run-server.sh} $out/bin/start-postgres-server \
-              --replace 'PSQL14=' 'PSQL14=${basePackages.psql_14.bin} #' \
-              --replace 'PSQL15=' 'PSQL15=${basePackages.psql_15.bin} #'
+            substitute ${./tools/run-server.sh.in} $out/bin/start-postgres-server \
+              --subst-var-by 'PSQL14_BINDIR' '${basePackages.psql_14.bin}' \
+              --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}'
             chmod +x $out/bin/start-postgres-server
           '';
 
           # Start a version of the client.
           start-client = pkgs.runCommand "start-postgres-client" {} ''
             mkdir -p $out/bin
-            substitute ${./tools/run-client.sh} $out/bin/start-postgres-client \
-              --replace 'PSQL14=' 'PSQL14=${basePackages.psql_14.bin} #'
+            substitute ${./tools/run-client.sh.in} $out/bin/start-postgres-client \
+              --subst-var-by 'PSQL14_BINDIR' '${basePackages.psql_14.bin}' \
+              --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}'
             chmod +x $out/bin/start-postgres-client
           '';
 
           # Migrate between two data directories.
           migrate-tool =
             let
-              configFile = ./tests/postgresql.conf;
+              configFile = ./tests/postgresql.conf.in;
               getkeyScript = ./tests/util/pgsodium_getkey.sh;
               primingScript = ./tests/prime.sql;
               migrationData = ./tests/migrations/data.sql;
             in pkgs.runCommand "migrate-postgres" {} ''
               mkdir -p $out/bin
-              substitute ${./tools/migrate-tool.sh} $out/bin/migrate-postgres \
-                --replace 'PSQL14=' 'PSQL14=${basePackages.psql_14.bin} #' \
-                --replace 'PSQL15=' 'PSQL15=${basePackages.psql_15.bin} #' \
-                --replace 'PSQL_CONF_FILE=' 'PSQL_CONF_FILE=${configFile} #' \
-                --replace 'PGSODIUM_GETKEY_SCRIPT=' 'PGSODIUM_GETKEY_SCRIPT=${getkeyScript} #' \
-                --replace 'PRIMING_SCRIPT=' 'PRIMING_SCRIPT=${primingScript} #' \
-                --replace 'MIGRATION_DATA=' 'MIGRATION_DATA=${migrationData} #'
+              substitute ${./tools/migrate-tool.sh.in} $out/bin/migrate-postgres \
+                --subst-var-by 'PSQL14_BINDIR' '${basePackages.psql_14.bin}' \
+                --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}' \
+                --subst-var-by 'PSQL_CONF_FILE' '${configFile}' \
+                --subst-var-by 'PGSODIUM_GETKEY' '${getkeyScript}' \
+                --subst-var-by 'PRIMING_SCRIPT' '${primingScript}' \
+                --subst-var-by 'MIGRATION_DATA' '${migrationData}'
 
               chmod +x $out/bin/migrate-postgres
             '';
@@ -264,7 +265,7 @@
             mkdir -p $PGDATA
             initdb --locale=C
 
-            substitute ${./tests/postgresql.conf} $PGDATA/postgresql.conf \
+            substitute ${./tests/postgresql.conf.in} $PGDATA/postgresql.conf \
               --subst-var-by PGSODIUM_GETKEY_SCRIPT "${./tests/util/pgsodium_getkey.sh}"
 
             postgres -k /tmp >logfile 2>&1 &
