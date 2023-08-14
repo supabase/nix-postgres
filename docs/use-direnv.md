@@ -1,5 +1,3 @@
-# 02 &mdash; Install `direnv`
-
 Have you ever used a tool like `pip`'s `bin/activate` script, or `rbenv`? These
 tools populate your shell environment with the right tools and scripts and
 dependencies (e.g. `PYTHONPATH`) to run your software.
@@ -150,7 +148,3 @@ This is the power of `direnv`: your projects always, on demand, will have the
 right tools configured and available, no matter if you last worked on them a day
 ago or a year ago, or it was done by your teammate, or you have a brand new
 computer that you've never programmed on.
-
-## Next page
-
-Not Invented Here.

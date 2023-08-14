@@ -178,7 +178,3 @@ shell goes away, `just` will be removed from your `$PATH` as well.
 
 There's an even easier way to do this that is completely transparent to you, as
 well...
-
-## Next page
-
-Next up: **[02 &mdash; Install `direnv`](./02-INSTALL-DIRENV.md)**
