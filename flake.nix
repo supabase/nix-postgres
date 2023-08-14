@@ -172,9 +172,9 @@
           };
 
         # Make a Docker Image from a given PostgreSQL version and binary package.
-        makePostgresDocker = binPackage:
+        makePostgresDocker = version: binPackage:
           pkgs.dockerTools.buildLayeredImage {
-            name = "postgresql-${binPackage.version}";
+            name = "postgresql-${version}";
             tag = "latest";
             contents = with pkgs; [ coreutils bash binPackage ];
 
@@ -201,7 +201,7 @@
         makePostgres = version: rec {
           bin = makePostgresBin version;
           exts = makeOurPostgresPkgsSet version;
-          docker = makePostgresDocker bin;
+          docker = makePostgresDocker version bin;
           recurseForDerivations = true;
         };
 
