@@ -2,15 +2,15 @@
 
 stdenv.mkDerivation rec {
   pname = "pg_hashids";
-  version = "unstable-2020-05-14";
+  version = "unstable-2022-09-17";
 
   buildInputs = [ postgresql ];
 
   src = fetchFromGitHub {
     owner  = "iCyberon";
     repo   = pname;
-    rev    = "83398bcbb616aac2970f5e77d93a3200f0f28e74";
-    hash   = "sha256-ykX+UGLCD0wYp6kJjQugFzKkyJzfO9jO1Yr1fTqS0HI=";
+    rev    = "cd0e1b31d52b394a0df64079406a14a4f7387cd6";
+    hash   = "sha256-Nmb7XLqQflYZfqj0yrewfb1Hl5YgEB5wfjBunPwIuOU=";
   };
 
   installPhase = ''
