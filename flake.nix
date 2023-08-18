@@ -358,6 +358,9 @@
             basePackages.start-client
             basePackages.migrate-tool
           ];
+          shellHook = ''
+            export HISTFILE=.history
+          '';
         };
       }
     );
