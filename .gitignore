@@ -8,3 +8,6 @@ result*
 
 # left around by pg_upgrade
 /delete_old_cluster.sh
+
+# shell history
+.history
