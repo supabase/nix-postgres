@@ -58,7 +58,7 @@
 # - Connection Settings -
 
 listen_addresses = '*'		# what IP address(es) to listen on;
-#port = 5432				# (change requires restart)
+#port = @PGSQL_DEFAULT_PORT@				# (change requires restart)
 max_connections = 100			# (change requires restart)
 #superuser_reserved_connections = 3	# (change requires restart)
 unix_socket_directories = '/tmp'	# comma-separated list of directories

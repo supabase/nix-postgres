@@ -5,9 +5,9 @@ repository:
 nix run .#start-server 14
 ```
 
-Replace the `14` with a `15`, and you'll be using a different version.
+Replace the `14` with a `15`, and you'll be using a different version. Optionally you can specify a second argument for the port.
 
-This always uses port 5432.
+You likely have a running postgres, so to not cause a conflict, this uses port 5435 by default.
 
 Actually, you don't even need the repository. You can do this from arbitrary
 directories, if the left-hand side of the hash character (`.` in this case) is a

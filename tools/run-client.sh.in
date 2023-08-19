@@ -19,4 +19,6 @@ fi
 
 export PATH=$BINDIR/bin:$PATH
 
-exec psql -h localhost postgres
+PORTNO="${2:-@PGSQL_DEFAULT_PORT@}"
+
+exec psql -p "$PORTNO" -h localhost postgres

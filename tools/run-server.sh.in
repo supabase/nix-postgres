@@ -19,14 +19,14 @@ fi
 
 export PATH=$BINDIR/bin:$PATH
 
-PORTNO="${2:-5432}"
+PORTNO="${2:-@PGSQL_DEFAULT_PORT@}"
 DATDIR=$(mktemp -d)
 mkdir -p "$DATDIR"
 
 echo "NOTE: using port $PORTNO for server"
 echo "NOTE: using temporary directory $DATDIR for data, which will not be removed"
 echo "NOTE: you are free to re-use this data directory at will"
-echo 
+echo
 
 initdb -D "$DATDIR" --locale=C
 exec postgres -p "$PORTNO" -D "$DATDIR" -k /tmp
