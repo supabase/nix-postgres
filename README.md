@@ -17,7 +17,7 @@ nix build .#psql_14/bin -o result-14
 nix build .#psql_15/bin -o result-15
 ```
 
-Builds Postgres 14 & 15 with all of our extensions and symlinks the resulting build artifaces e.g. `psql`, `pg_dump` etc at `result-15` and `result-15` respectively.
+Builds Postgres 14 & 15 with all of our extensions and symlinks the resulting build artifaces e.g. `psql`, `pg_dump` etc at `result-14` and `result-15` respectively.
 
 
 On first run these commands will take a long time to complete. Intermediate results are cached and reused leading to significantly reduced built times on subsequent runs.
