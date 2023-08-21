@@ -22,7 +22,7 @@ Builds Postgres 14 & 15 with all of our extensions and symlinks the resulting bu
 
 On first run these commands will take a long time to complete. Intermediate results are cached and reused leading to significantly reduced built times on subsequent runs.
 
-The Postgres build itself is defined upstream in [nixpkgs#postgresqlXX](https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/services/databases/postgresql.nix). That distribution is frequently updated and historically has released minor and major updates within 10 days. We can optionally override the version number or vendor the derivation to support additional versions.
+The Postgres build itself is defined upstream in [nixpkgs#postgresqlXX](https://github.com/NixOS/nixpkgs/blob/master/pkgs/servers/sql/postgresql/default.nix). That distribution is frequently updated and historically has released minor and major updates within 10 days. We can optionally override the version number or vendor the derivation to support additional versions.
 
 Note that nixpkgs supports 1 minor version (the most recent) for each major version.
 
