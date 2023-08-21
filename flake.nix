@@ -24,6 +24,8 @@
       system.aarch64-linux
     ]; in flake-utils.lib.eachSystem ourSystems (system:
       let
+        pgsqlDefaultPort = "5435";
+
         # The 'pkgs' variable holds all the upstream packages in nixpkgs, which
         # we can use to build our own images; it is the common name to refer to
         # a copy of nixpkgs which contains all its packages.
@@ -177,13 +179,16 @@
           let
             initScript = pkgs.runCommand "docker-init.sh" {} ''
               mkdir -p $out/bin
-              cp ${./docker/init.sh} $out/bin/init.sh
+              substitute ${./docker/init.sh.in} $out/bin/init.sh \
+                --subst-var-by 'PGSQL_DEFAULT_PORT' '${pgsqlDefaultPort}'
+
               chmod +x $out/bin/init.sh
             '';
 
             postgresqlConfig = pkgs.runCommand "postgresql.conf" {} ''
               mkdir -p $out/etc/
               substitute ${./tests/postgresql.conf.in} $out/etc/postgresql.conf \
+                --subst-var-by 'PGSQL_DEFAULT_PORT' '${pgsqlDefaultPort}' \
                 --subst-var-by PGSODIUM_GETKEY_SCRIPT "${./tests/util/pgsodium_getkey.sh}"
             '';
 
@@ -211,7 +216,7 @@
 
             config = {
               Cmd = [ "/bin/init.sh" ];
-              ExposedPorts = { "5432/tcp" = {}; };
+              ExposedPorts = { "${pgsqlDefaultPort}/tcp" = {}; };
               WorkingDir = "/data";
               Volumes = { "/data" = { }; };
             };
@@ -249,6 +254,7 @@
           start-server = pkgs.runCommand "start-postgres-server" {} ''
             mkdir -p $out/bin
             substitute ${./tools/run-server.sh.in} $out/bin/start-postgres-server \
+              --subst-var-by 'PGSQL_DEFAULT_PORT' '${pgsqlDefaultPort}' \
               --subst-var-by 'PSQL14_BINDIR' '${basePackages.psql_14.bin}' \
               --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}'
             chmod +x $out/bin/start-postgres-server
@@ -258,6 +264,7 @@
           start-client = pkgs.runCommand "start-postgres-client" {} ''
             mkdir -p $out/bin
             substitute ${./tools/run-client.sh.in} $out/bin/start-postgres-client \
+              --subst-var-by 'PGSQL_DEFAULT_PORT' '${pgsqlDefaultPort}' \
               --subst-var-by 'PSQL14_BINDIR' '${basePackages.psql_14.bin}' \
               --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}'
             chmod +x $out/bin/start-postgres-client

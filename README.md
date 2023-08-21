@@ -99,7 +99,7 @@ need to download this repository; just use `nix run`:
 nix run github:supabase/nix-postgres#start-server 15
 ```
 
-This will start PostgreSQL 15 on port `5432` on localhost with a temporary directory created by `mktemp -d`. Connect to it:
+This will start PostgreSQL 15 on port `5435` on localhost with a temporary directory created by `mktemp -d`. Connect to it:
 
 ```
 austin@GANON:~$ nix run github:supabase/nix-postgres#start-client 14
