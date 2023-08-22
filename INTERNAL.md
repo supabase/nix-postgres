@@ -47,7 +47,7 @@ Extensions included with the Postgres distribution come from two sources:
 - Upstream in [nixpkgs](https://github.com/NixOS/nixpkgs/tree/a996f7185eaaa8ae261adbc6b772761d62869796/pkgs/servers/sql/postgresql/ext)
 - Locally in [./ext](./ext)
 
-Each extension has a default version that can be easily updated or overriden, but maintaining multiple versions of each extension long-term is not practical with current tooling.
+Each extension has a default version that can be easily updated or overriden. Multiple versions can be managed on git branches or concurrently with unique names e.g. `supautils-1.1`, `supautils-1.2`.
 
 ## Testing
 
