@@ -17,7 +17,7 @@ nix build .#psql_14/bin -o result-14
 nix build .#psql_15/bin -o result-15
 ```
 
-Builds Postgres 14 & 15 with all of our extensions and symlinks the resulting build artifaces e.g. `psql`, `pg_dump` etc at `result-14` and `result-15` respectively.
+Builds Postgres 14 & 15 with all of our extensions and symlinks the resulting build artifacts e.g. `psql`, `pg_dump` etc at `result-14` and `result-15` respectively.
 
 
 On first run these commands will take a long time to complete. Intermediate results are cached and reused leading to significantly reduced built times on subsequent runs.
@@ -153,9 +153,9 @@ Once available upstream, new versions can be added [here](https://github.com/sup
 
 ### A pushed git tag produces an AWS AMI + docker image.
 
-Not in prototype functional
+Not in prototype
 
-## Consider that we have the following PostgreSQL targets
+## Consider that we have the following PostgreSQL targets:
 
 ### Supported PostgreSQL versions (14), these are older versions not yet migrated to latest
 
@@ -179,7 +179,7 @@ Support pending upstream merge of [PR](https://github.com/NixOS/nixpkgs/pull/249
 
 ### Future patch PostgreSQL version (14.x, 15.y)
 
-These occur upstream. If we want to stay on the outdated version we can add an overlay to this repo.
+These occur upstream. If we want to stay on the outdated version we can add an override to this repo.
 
 ### Each version will be tested against all extensions
 
@@ -187,9 +187,10 @@ Builtin and runs in CI
 
 ## Limitations
 
-### Lack of darwin-arm support
+- Lack of darwin-arm support: This is blocked by pgrx extensions. Everything except those extensions is functional.
+- Difficulty producing docker images in Github Actions CI: solvable with changes to our custom runners
 
-This is blocked by pgrx extensions. Everything except those extensions is functional.
+
 
 ## Other
 
