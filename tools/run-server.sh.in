@@ -19,6 +19,8 @@ fi
 
 export PATH=$BINDIR/bin:$PATH
 
+PSQL_CONF_FILE=@PSQL_CONF_FILE@
+PGSODIUM_GETKEY_SCRIPT=@PGSODIUM_GETKEY@
 PORTNO="${2:-@PGSQL_DEFAULT_PORT@}"
 DATDIR=$(mktemp -d)
 mkdir -p "$DATDIR"
@@ -29,4 +31,10 @@ echo "NOTE: you are free to re-use this data directory at will"
 echo
 
 initdb -D "$DATDIR" --locale=C
+
+echo "NOTE: patching postgresql.conf files"
+sed \
+  "s#@PGSODIUM_GETKEY_SCRIPT@#$PGSODIUM_GETKEY_SCRIPT#g" \
+  $PSQL_CONF_FILE > "$DATDIR/postgresql.conf"
+
 exec postgres -p "$PORTNO" -D "$DATDIR" -k /tmp

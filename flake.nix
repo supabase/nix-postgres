@@ -251,14 +251,22 @@
           psql_15 = makePostgres "15";
 
           # Start a version of the server.
-          start-server = pkgs.runCommand "start-postgres-server" {} ''
-            mkdir -p $out/bin
-            substitute ${./tools/run-server.sh.in} $out/bin/start-postgres-server \
-              --subst-var-by 'PGSQL_DEFAULT_PORT' '${pgsqlDefaultPort}' \
-              --subst-var-by 'PSQL14_BINDIR' '${basePackages.psql_14.bin}' \
-              --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}'
-            chmod +x $out/bin/start-postgres-server
-          '';
+          start-server =
+            let
+              configFile = ./tests/postgresql.conf.in;
+              getkeyScript = ./tests/util/pgsodium_getkey.sh;
+            in
+            pkgs.runCommand "start-postgres-server" {} ''
+              mkdir -p $out/bin
+              substitute ${./tools/run-server.sh.in} $out/bin/start-postgres-server \
+                --subst-var-by 'PGSQL_DEFAULT_PORT' '${pgsqlDefaultPort}' \
+                --subst-var-by 'PSQL14_BINDIR' '${basePackages.psql_14.bin}' \
+                --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}' \
+                --subst-var-by 'PSQL_CONF_FILE' '${configFile}' \
+                --subst-var-by 'PGSODIUM_GETKEY' '${getkeyScript}'
+
+              chmod +x $out/bin/start-postgres-server
+            '';
 
           # Start a version of the client.
           start-client = pkgs.runCommand "start-postgres-client" {} ''
