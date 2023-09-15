@@ -86,6 +86,7 @@ The binary distributions have many extensions enabled; these include:
 - pg_tle
 - wrappers
 - supautils
+- citus
 
 You can just use `CREATE EXTENSION` to enable most of these. Some may require
 tweaks to [postgresql.conf](./tests/postgresql.conf) to enable.

@@ -301,6 +301,15 @@
 
               chmod +x $out/bin/migrate-postgres
             '';
+
+          start-replica = pkgs.runCommand "start-postgres-replica" {} ''
+            mkdir -p $out/bin
+            substitute ${./tools/run-replica.sh.in} $out/bin/start-postgres-replica \
+              --subst-var-by 'PGSQL_SUPERUSER' '${pgsqlSuperuser}' \
+              --subst-var-by 'PSQL14_BINDIR' '${basePackages.psql_14.bin}' \
+              --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}'
+            chmod +x $out/bin/start-postgres-replica
+          '';
         };
 
         # Create a testing harness for a PostgreSQL package. This is used for
@@ -361,6 +370,7 @@
           in {
           start-server = mkApp "start-server" "start-postgres-server";
           start-client = mkApp "start-client" "start-postgres-client";
+          start-replica = mkApp "start-replica" "start-postgres-replica";
           migration-test = mkApp "migrate-tool" "migrate-postgres";
         };
 
@@ -375,6 +385,7 @@
 
             basePackages.start-server
             basePackages.start-client
+            basePackages.start-replica
             basePackages.migrate-tool
           ];
           shellHook = ''
