@@ -25,6 +25,7 @@
     ]; in flake-utils.lib.eachSystem ourSystems (system:
       let
         pgsqlDefaultPort = "5435";
+        pgsqlSuperuser   = "postgres";
 
         # The 'pkgs' variable holds all the upstream packages in nixpkgs, which
         # we can use to build our own images; it is the common name to refer to
@@ -261,6 +262,7 @@
               mkdir -p $out/bin
               substitute ${./tools/run-server.sh.in} $out/bin/start-postgres-server \
                 --subst-var-by 'PGSQL_DEFAULT_PORT' '${pgsqlDefaultPort}' \
+                --subst-var-by 'PGSQL_SUPERUSER' '${pgsqlSuperuser}' \
                 --subst-var-by 'PSQL14_BINDIR' '${basePackages.psql_14.bin}' \
                 --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}' \
                 --subst-var-by 'PSQL_CONF_FILE' '${configFile}' \
@@ -274,6 +276,7 @@
             mkdir -p $out/bin
             substitute ${./tools/run-client.sh.in} $out/bin/start-postgres-client \
               --subst-var-by 'PGSQL_DEFAULT_PORT' '${pgsqlDefaultPort}' \
+              --subst-var-by 'PGSQL_SUPERUSER' '${pgsqlSuperuser}' \
               --subst-var-by 'PSQL14_BINDIR' '${basePackages.psql_14.bin}' \
               --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}'
             chmod +x $out/bin/start-postgres-client
