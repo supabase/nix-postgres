@@ -1,11 +1,11 @@
 final: prev: {
-  cargo-pgrx_0_9_7 = prev.cargo-pgrx.overrideAttrs (oldAttrs: rec {
+  cargo-pgrx_0_9_8 = prev.cargo-pgrx.overrideAttrs (oldAttrs: rec {
     pname = "cargo-pgrx";
-    version = "0.9.7";
+    version = "0.9.8";
 
     src = prev.fetchCrate {
       inherit version pname;
-      hash = "sha256-uDBq7tUZ9f8h5nlRFR1mv4+Ty1OFtAk5P7OTNQPI1gI=";
+      hash = "sha256-Sk9fz84EheP+Ohq2e2E1q7dKDPE2Y4QSsHGlNvNb/g0=";
     };
 
     # NOTE (aseipp): normally, we would just use 'cargoHash' here, but
@@ -17,11 +17,11 @@ final: prev: {
     cargoDeps = oldAttrs.cargoDeps.overrideAttrs (prev.lib.const {
       name = "${pname}-vendor.tar.gz";
       inherit src;
-      outputHash = "sha256-5WlGVuTi/zdraztcTFypZ52s7+Q4SJwngecIyxh81PE=";
+      outputHash = "sha256-F3/hdS7derrdSprSH4ONrhlhEDxJ52+X9jVFBU5Co8U=";
     });
   });
 
-  buildPgrxExtension_0_9_7 = prev.buildPgrxExtension.override {
-    cargo-pgrx = final.cargo-pgrx_0_9_7;
+  buildPgrxExtension_0_9_8 = prev.buildPgrxExtension.override {
+    cargo-pgrx = final.cargo-pgrx_0_9_8;
   };
 }
