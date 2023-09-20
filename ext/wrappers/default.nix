@@ -1,17 +1,17 @@
 { lib, stdenv, fetchFromGitHub, openssl, pkg-config
-, postgresql, buildPgrxExtension_0_9_7
+, postgresql, buildPgrxExtension_0_9_8
 }:
 
-buildPgrxExtension_0_9_7 rec {
+buildPgrxExtension_0_9_8 rec {
   pname = "supabase-wrappers";
-  version = "unstable-2023-07-31";
+  version = "unstable-2023-09-20";
   inherit postgresql;
 
   src = fetchFromGitHub {
     owner  = "supabase";
     repo   = "wrappers";
-    rev    = "d1303f1d584f98f14cdb14c0f1e026a8d0fc7bee";
-    hash   = "sha256-eVmdaH0BVc245749NYEB2VToPcE009k556JckKwqD4I=";
+    rev    = "b749a4928ab8b85afdce45eb005596a90c7ef0ed";
+    hash   = "sha256-53QOv6q5dw3X53InMiJxd5GcQl9J2y8u1aGMtiIdN1Q=";
   };
 
   nativeBuildInputs = [ pkg-config ];

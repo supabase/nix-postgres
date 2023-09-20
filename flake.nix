@@ -347,7 +347,7 @@
           # set can go here.
           inherit (pkgs)
             # NOTE: comes from our cargo-pgrx.nix overlay
-            cargo-pgrx_0_9_7
+            cargo-pgrx_0_9_8
             ;
         };
 
