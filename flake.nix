@@ -94,9 +94,9 @@
           ./ext/pg_net.nix
           ./ext/pg_hashids.nix
           ./ext/pgsodium.nix
-          ./ext/pg_graphql.nix
+          #./ext/pg_graphql.nix
           ./ext/pg_stat_monitor.nix
-          ./ext/pg_jsonschema.nix
+          #./ext/pg_jsonschema.nix
           ./ext/vault.nix
           ./ext/hypopg.nix
           ./ext/pg_tle.nix
@@ -333,7 +333,8 @@
             createdb -h localhost testing
 
             psql -h localhost -d testing -Xaf ${./tests/prime.sql}
-            pg_prove -h localhost -d testing ${sqlTests}/*.sql
+            shopt -s extglob
+            pg_prove -h localhost -d testing ${sqlTests}/!(*graphql*).sql
 
             pkill postgres
             mv logfile $out
