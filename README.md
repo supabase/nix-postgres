@@ -89,7 +89,7 @@ The binary distributions have many extensions enabled; these include:
 - citus
 
 You can just use `CREATE EXTENSION` to enable most of these. Some may require
-tweaks to [postgresql.conf](./tests/postgresql.conf.in) to enable.
+tweaks to [postgresql.conf.in](./tests/postgresql.conf.in) to enable.
 
 ### Helpful development utilities
 
@@ -121,7 +121,7 @@ major version. This will be expanded in the future.
 You can test database migrations (using some artificial data schemas);
 it uses the following data to set up the database:
 
-- [postgresql.conf](./tests/postgresql.conf.in)
+- [postgresql.conf.in](./tests/postgresql.conf.in)
 - [prime.sql](./tests/prime.sql)
 - [data.sql](./tests/migrations/data.sql)
 
