@@ -9,7 +9,7 @@ and some of the design constraints this repository are under, please see the
 [`docs/`](./docs/) directory which should help get you up to speed.
 
 If you want to install Nix and play along quickly, check out the
-[Start Here](./docs/00-START-HERE.md) page.
+[Start Here](./docs/start-here.md) page.
 
 > ⚠️ 🚧 **NOTE** 🚧 ⚠️ &mdash; This repository is **EXPERIMENTAL**. It is not an
 > official Supabase project, and may be abandoned or changed at any moment;
