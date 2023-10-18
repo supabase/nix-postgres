@@ -73,7 +73,6 @@
           /* pljava */
           "plv8"
           "rum"
-          "pgvector"
           "pg_repack"
           "pgroonga"
         ];
@@ -97,6 +96,7 @@
           ./ext/pg_graphql.nix
           ./ext/pg_stat_monitor.nix
           ./ext/pg_jsonschema.nix
+          ./ext/pgvector.nix
           ./ext/vault.nix
           ./ext/hypopg.nix
           ./ext/pg_tle.nix
