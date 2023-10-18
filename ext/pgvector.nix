@@ -1,10 +1,10 @@
-{ lib, stdenv, fetchFromGitHub, curl, postgresql }:
+{ lib, stdenv, fetchFromGitHub, postgresql }:
 
 stdenv.mkDerivation rec {
   pname = "pgvector";
   version = "0.5.1";
 
-  buildInputs = [ curl postgresql ];
+  buildInputs = [ postgresql ];
 
   src = fetchFromGitHub {
     owner  = "pgvector";
