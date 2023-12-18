@@ -4,14 +4,14 @@
 
 buildPgrxExtension_0_10_2 rec {
   pname = "supabase-wrappers";
-  version = "unstable-2023-10-03";
+  version = "unstable-2023-12-18";
   inherit postgresql;
 
   src = fetchFromGitHub {
     owner  = "supabase";
     repo   = "wrappers";
-    rev    = "4b64a6e55dcfae408627c5c52a3a15aecc9c56d5";
-    hash   = "sha256-nlpRkr/L4owv+ulBhD5BGPCRIkAADwtOCA0nUcABiX4=";
+    rev    = "079922e536df0f4d827a0b35fc0432e7e20c6e1c";
+    hash   = "sha256-wvsAqDk+1am6mSBCF5uzDArnbBIpLqTylLzF4VZ/p08=";
   };
 
   nativeBuildInputs = [ pkg-config ];
