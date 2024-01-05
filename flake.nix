@@ -339,6 +339,21 @@
             mv logfile $out
           '';
 
+        simpleNixosTest = pkgs.nixosTest {
+          name = "simple-nixos-test";
+          nodes.machine = {
+            users.users.nixos = {
+              isNormalUser = true;
+              initialHashedPassword = "nixos";
+            };
+          };
+          testScript = ''
+            start_all();
+
+            machine.succeed("sudo -u nixos whoami")
+          '';
+        };
+
       in rec {
         # The list of all packages that can be built with 'nix build'. The list
         # of names that can be used can be shown with 'nix flake show'
@@ -356,6 +371,7 @@
         checks = {
           psql_14 = makeCheckHarness basePackages.psql_14.bin;
           psql_15 = makeCheckHarness basePackages.psql_15.bin;
+          inherit simpleNixosTest;
         };
 
         # Apps is a list of names of things that can be executed with 'nix run';
