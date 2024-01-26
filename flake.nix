@@ -214,6 +214,7 @@
                 dockerTools.binSh sudo postgresqlConfig
               ];
               pathsToLink = [ "/bin" "/etc" "/var" "/share" ];
+              buildInputs = [ pkgs.qemu ];
             };
 
             config = {
@@ -347,8 +348,7 @@
           # set can go here.
           inherit (pkgs)
             # NOTE: comes from our cargo-pgrx.nix overlay
-            cargo-pgrx_0_10_2
-            ;
+            cargo-pgrx_0_10_2;
         };
 
         # The list of exported 'checks' that are run with every run of 'nix
