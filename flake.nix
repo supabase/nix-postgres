@@ -4,6 +4,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    nix2container.url = "github:nlewo/nix2container";
   };
 
   nixConfig = {
@@ -16,7 +17,7 @@
     ];
   };
 
-  outputs = { self, nixpkgs, flake-utils }: let
+  outputs = { self, nixpkgs, flake-utils, nix2container }: let
     gitRev = "vcs=${self.shortRev or "dirty"}+${builtins.substring 0 8 (self.lastModifiedDate or self.lastModified or "19700101")}";
 
     ourSystems = with flake-utils.lib; [
@@ -26,6 +27,7 @@
       let
         pgsqlDefaultPort = "5435";
         pgsqlSuperuser   = "postgres";
+        nix2img = nix2container.packages.${system}.nix2container;
 
         # The 'pkgs' variable holds all the upstream packages in nixpkgs, which
         # we can use to build our own images; it is the common name to refer to
@@ -224,6 +226,12 @@
               Volumes = { "/data" = { }; };
             };
           };
+          makeSimpleImage = nix2img.buildImage {
+              name = "basic";
+              config = {
+                entrypoint = ["${pkgs.hello}/bin/hello"];
+              };
+            };
 
         # Create an attribute set, containing all the relevant packages for a
         # PostgreSQL install, wrapped up with a bow on top. There are three
@@ -241,6 +249,7 @@
           bin = makePostgresBin version;
           exts = makeOurPostgresPkgsSet version;
           docker = makePostgresDocker version bin;
+          simpledocker = makeSimpleImage;
           recurseForDerivations = true;
         };
 
