@@ -226,13 +226,97 @@
               Volumes = { "/data" = { }; };
             };
           };
-          makeSimpleImage = nix2img.buildImage {
-              name = "basic";
+          makePostgresDocker2 =  version: binPackage:
+            let
+            initScript = pkgs.runCommand "docker-init.sh" {} ''
+              mkdir -p $out/bin
+              substitute ${./docker/init.sh.in} $out/bin/init.sh \
+                --subst-var-by 'PGSQL_DEFAULT_PORT' '${pgsqlDefaultPort}'
+
+              chmod +x $out/bin/init.sh
+            '';
+
+            postgresqlConfig = pkgs.runCommand "postgresql.conf" {} ''
+              mkdir -p $out/etc/
+              substitute ${./tests/postgresql.conf.in} $out/etc/postgresql.conf \
+                --subst-var-by 'PGSQL_DEFAULT_PORT' '${pgsqlDefaultPort}' \
+                --subst-var-by PGSODIUM_GETKEY_SCRIPT "${./tests/util/pgsodium_getkey.sh}"
+            '';
+
+              l = pkgs.lib // builtins;
+
+              user = "postgres";
+              group = "postgres";
+              uid = "1001";
+              gid = "1001";
+
+              mkUser = pkgs.runCommand "mkUser" { } ''
+                mkdir -p $out/etc/pam.d
+
+                echo "${user}:x:${uid}:${gid}::" > $out/etc/passwd
+                echo "${user}:!x:::::::" > $out/etc/shadow
+
+                echo "${group}:x:${gid}:" > $out/etc/group
+                echo "${group}:x::" > $out/etc/gshadow
+
+                cat > $out/etc/pam.d/other <<EOF
+                account sufficient pam_unix.so
+                auth sufficient pam_rootok.so
+                password requisite pam_unix.so nullok sha512
+                session required pam_unix.so
+                EOF
+
+                touch $out/etc/login.defs
+                mkdir -p $out/home/${user}
+              '';
+
+              entrypoint = pkgs.writeShellApplication
+                {
+                  name = "entrypoint";
+                  text = ''
+                    (cd /home/postgres && psql)
+                  '';
+                };
+            in
+            nix2img.buildImage {
+              name = "postgresql-example";
+              tag = "latest";
+
+              # initializeNixDatabase = true;
+              nixUid = l.toInt uid;
+              nixGid = l.toInt gid;
+
+              copyToRoot = [
+                (pkgs.buildEnv {
+                  name = "root";
+                  paths = [ pkgs.coreutils pkgs.nix initScript binPackage postgresqlConfig];
+                  pathsToLink = [ "/bin" "/etc" "/var" "/share" ];
+                })
+                mkUser
+              ];
+
+              # perms = [{
+              #   path = mkUser;
+              #   regex = "/home/${user}";
+              #   mode = "0744";
+              #   uid = l.toInt uid;
+              #   gid = l.toInt gid;
+              #   uname = user;
+              #   gname = group;
+              # }];
+
               config = {
-                entrypoint = ["${pkgs.hello}/bin/hello"];
+                Entrypoint = [ "${entrypoint}/bin/entrypoint" ];
+                User = "postgres";
+                WorkingDir = "/home/postgres";
+                Env = [
+                  "HOME=/home/postgres"
+                  "NIX_PAGER=cat"
+                  "USER=postgres"
+                ];
               };
             };
-
+          
         # Create an attribute set, containing all the relevant packages for a
         # PostgreSQL install, wrapped up with a bow on top. There are three
         # packages:
@@ -249,7 +333,7 @@
           bin = makePostgresBin version;
           exts = makeOurPostgresPkgsSet version;
           docker = makePostgresDocker version bin;
-          simpledocker = makeSimpleImage;
+          docker2 = makePostgresDocker2 version bin;
           recurseForDerivations = true;
         };
 
