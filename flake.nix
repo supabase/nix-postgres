@@ -348,7 +348,7 @@
           # set can go here.
           inherit (pkgs)
             # NOTE: comes from our cargo-pgrx.nix overlay
-            cargo-pgrx_0_11_2;
+            cargo-pgrx_0_11_0;
         };
 
         # The list of exported 'checks' that are run with every run of 'nix
