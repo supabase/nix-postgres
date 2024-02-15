@@ -100,7 +100,7 @@
           ./ext/vault.nix
           ./ext/hypopg.nix
           ./ext/pg_tle.nix
-          ./ext/wrappers/default.nix
+          #./ext/wrappers/default.nix
           ./ext/supautils.nix
         ];
 
@@ -348,7 +348,7 @@
           # set can go here.
           inherit (pkgs)
             # NOTE: comes from our cargo-pgrx.nix overlay
-            cargo-pgrx_0_10_2;
+            cargo-pgrx_0_11_2;
         };
 
         # The list of exported 'checks' that are run with every run of 'nix
