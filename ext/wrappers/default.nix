@@ -1,8 +1,8 @@
 { lib, stdenv, fetchFromGitHub, openssl, pkg-config
-, postgresql, buildPgrxExtension_0_11_2
+, postgresql, buildPgrxExtension_0_11_0
 }:
 
-buildPgrxExtension_0_11_2 rec {
+buildPgrxExtension_0_11_0 rec {
   pname = "supabase-wrappers";
   version = "unstable-2024-02-14";
   inherit postgresql;
