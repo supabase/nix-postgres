@@ -21,12 +21,12 @@ buildPgrxExtension_0_11_0 rec {
   OPENSSL_NO_VENDOR = 1;
 
   cargoLock = {
-    lockFile = ./Cargo.lock;
+    lockFile = "${src}/wrappers/Cargo.lock";
     outputHashes = {
       "clickhouse-rs-1.0.0-alpha.1" = "sha256-0zmoUo/GLyCKDLkpBsnLAyGs1xz6cubJhn+eVqMEMaw=";
     };
   };
-  postPatch = "cp ${./Cargo.lock} Cargo.lock";
+  postPatch = "cp ${cargoLock.lockFile} Cargo.lock";
 
   buildAndTestSubdir = "wrappers";
   buildFeatures = [
