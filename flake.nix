@@ -4,6 +4,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    nix2container.url = "github:nlewo/nix2container";
   };
 
   nixConfig = {
@@ -16,7 +17,7 @@
     ];
   };
 
-  outputs = { self, nixpkgs, flake-utils }: let
+  outputs = { self, nixpkgs, flake-utils, nix2container }: let
     gitRev = "vcs=${self.shortRev or "dirty"}+${builtins.substring 0 8 (self.lastModifiedDate or self.lastModified or "19700101")}";
 
     ourSystems = with flake-utils.lib; [
@@ -26,6 +27,7 @@
       let
         pgsqlDefaultPort = "5435";
         pgsqlSuperuser   = "postgres";
+        nix2img = nix2container.packages.${system}.nix2container;
 
         # The 'pkgs' variable holds all the upstream packages in nixpkgs, which
         # we can use to build our own images; it is the common name to refer to
@@ -177,8 +179,9 @@
           };
 
         # Make a Docker Image from a given PostgreSQL version and binary package.
-        makePostgresDocker = version: binPackage:
-          let
+        # updated to use https://github.com/nlewo/nix2container (samrose)
+          makePostgresDocker =  version: binPackage:
+            let
             initScript = pkgs.runCommand "docker-init.sh" {} ''
               mkdir -p $out/bin
               substitute ${./docker/init.sh.in} $out/bin/init.sh \
@@ -194,37 +197,102 @@
                 --subst-var-by PGSODIUM_GETKEY_SCRIPT "${./tests/util/pgsodium_getkey.sh}"
             '';
 
-          in pkgs.dockerTools.buildImage {
-            name = "postgresql-${version}";
-            tag = "latest";
+              l = pkgs.lib // builtins;
 
-            runAsRoot = ''
-              #!${pkgs.runtimeShell}
-              ${pkgs.dockerTools.shadowSetup}
-              groupadd -r postgres
-              useradd -r -g postgres postgres
-              mkdir -p /data /run/postgresql
-              chown postgres:postgres /data /run/postgresql
-            '';
+              user = "postgres";
+              group = "postgres";
+              uid = "1001";
+              gid = "1001";
 
-            copyToRoot = pkgs.buildEnv {
-              name = "image-root";
-              paths = with pkgs; [
-                initScript coreutils bash binPackage
-                dockerTools.binSh sudo postgresqlConfig
+              mkUser = pkgs.runCommand "mkUser" { } ''
+                mkdir -p $out/etc/pam.d
+
+                echo "${user}:x:${uid}:${gid}::" > $out/etc/passwd
+                echo "${user}:!x:::::::" > $out/etc/shadow
+
+                echo "${group}:x:${gid}:" > $out/etc/group
+                echo "${group}:x::" > $out/etc/gshadow
+
+                cat > $out/etc/pam.d/other <<EOF
+                account sufficient pam_unix.so
+                auth sufficient pam_rootok.so
+                password requisite pam_unix.so nullok sha512
+                session required pam_unix.so
+                EOF
+
+                touch $out/etc/login.defs
+              '';
+              run = pkgs.runCommand "run" { } ''
+                mkdir -p $out/run/postgresql
+              '';
+              data = pkgs.runCommand "data" { } ''
+                mkdir -p $out/data/postgresql
+              '';
+              pgconf = pkgs.runCommand "pgconf" { } ''
+                mkdir -p $out/data/pgconf
+              '';
+            in
+            nix2img.buildImage {
+              name = "postgresql-${version}";
+              tag = "latest";
+
+              nixUid = l.toInt uid;
+              nixGid = l.toInt gid;
+
+              copyToRoot = [
+                (pkgs.buildEnv {
+                  name = "image-root";
+                  paths = [ data run pkgs.coreutils pkgs.which pkgs.bash pkgs.nix pkgs.less initScript binPackage postgresqlConfig pkgs.dockerTools.binSh pkgs.sudo ];
+                  pathsToLink = [ "/bin" "/etc" "/var" "/share" "/data" "/run" ];
+                })
+                mkUser
               ];
-              pathsToLink = [ "/bin" "/etc" "/var" "/share" ];
-              buildInputs = [ pkgs.qemu ];
-            };
 
-            config = {
-              Cmd = [ "/bin/init.sh" ];
-              ExposedPorts = { "${pgsqlDefaultPort}/tcp" = {}; };
-              WorkingDir = "/data";
-              Volumes = { "/data" = { }; };
-            };
-          };
+              perms = [
+              {
+                path = data;
+                regex = "";
+                mode = "0744";
+                uid = l.toInt uid;
+                gid = l.toInt gid;
+                uname = user;
+                gname = group;
+              }
+              {
+                path = pgconf;
+                regex = "";
+                mode = "0744";
+                uid = l.toInt uid;
+                gid = l.toInt gid;
+                uname = user;
+                gname = group;
+              }
+              {
+                path = run;
+                regex = "";
+                mode = "0744";
+                uid = l.toInt uid;
+                gid = l.toInt gid;
+                uname = user;
+                gname = group;
+              }
+              ];
 
+              config = {
+                Entrypoint = ["/bin/init.sh"];
+                User = "postgres";
+                WorkingDir = "/data";
+                Env = [
+                  "NIX_PAGER=cat"
+                  "USER=postgres"
+                  "PGDATA=/data/postgresql"
+                  "PGHOST=/run/postgresql"
+                ];
+                ExposedPorts = { "${pgsqlDefaultPort}/tcp" = {}; };
+                Volumes = { "/data" = { }; };
+              };
+            };
+          
         # Create an attribute set, containing all the relevant packages for a
         # PostgreSQL install, wrapped up with a bow on top. There are three
         # packages:
