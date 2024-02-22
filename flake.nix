@@ -179,54 +179,8 @@
           };
 
         # Make a Docker Image from a given PostgreSQL version and binary package.
-        makePostgresDocker = version: binPackage:
-          let
-            initScript = pkgs.runCommand "docker-init.sh" {} ''
-              mkdir -p $out/bin
-              substitute ${./docker/init.sh.in} $out/bin/init.sh \
-                --subst-var-by 'PGSQL_DEFAULT_PORT' '${pgsqlDefaultPort}'
-
-              chmod +x $out/bin/init.sh
-            '';
-
-            postgresqlConfig = pkgs.runCommand "postgresql.conf" {} ''
-              mkdir -p $out/etc/
-              substitute ${./tests/postgresql.conf.in} $out/etc/postgresql.conf \
-                --subst-var-by 'PGSQL_DEFAULT_PORT' '${pgsqlDefaultPort}' \
-                --subst-var-by PGSODIUM_GETKEY_SCRIPT "${./tests/util/pgsodium_getkey.sh}"
-            '';
-
-          in pkgs.dockerTools.buildImage {
-            name = "postgresql-${version}";
-            tag = "latest";
-
-            runAsRoot = ''
-              #!${pkgs.runtimeShell}
-              ${pkgs.dockerTools.shadowSetup}
-              groupadd -r postgres
-              useradd -r -g postgres postgres
-              mkdir -p /data /run/postgresql
-              chown postgres:postgres /data /run/postgresql
-            '';
-
-            copyToRoot = pkgs.buildEnv {
-              name = "image-root";
-              paths = with pkgs; [
-                initScript coreutils bash binPackage
-                dockerTools.binSh sudo postgresqlConfig
-              ];
-              pathsToLink = [ "/bin" "/etc" "/var" "/share" ];
-              buildInputs = [ pkgs.qemu ];
-            };
-
-            config = {
-              Cmd = [ "/bin/init.sh" ];
-              ExposedPorts = { "${pgsqlDefaultPort}/tcp" = {}; };
-              WorkingDir = "/data";
-              Volumes = { "/data" = { }; };
-            };
-          };
-          makePostgresDocker2 =  version: binPackage:
+        # updated to use https://github.com/nlewo/nix2container (samrose)
+          makePostgresDocker =  version: binPackage:
             let
             initScript = pkgs.runCommand "docker-init.sh" {} ''
               mkdir -p $out/bin
@@ -267,53 +221,75 @@
                 EOF
 
                 touch $out/etc/login.defs
-                mkdir -p $out/home/${user}
               '';
-
-              entrypoint = pkgs.writeShellApplication
-                {
-                  name = "entrypoint";
-                  text = ''
-                    (cd /home/postgres && psql)
-                  '';
-                };
+              run = pkgs.runCommand "run" { } ''
+                mkdir -p $out/run/postgresql
+              '';
+              data = pkgs.runCommand "data" { } ''
+                mkdir -p $out/data/postgresql
+              '';
+              pgconf = pkgs.runCommand "pgconf" { } ''
+                mkdir -p $out/data/pgconf
+              '';
             in
             nix2img.buildImage {
-              name = "postgresql-example";
+              name = "postgresql-${version}";
               tag = "latest";
 
-              # initializeNixDatabase = true;
               nixUid = l.toInt uid;
               nixGid = l.toInt gid;
 
               copyToRoot = [
                 (pkgs.buildEnv {
-                  name = "root";
-                  paths = [ pkgs.coreutils pkgs.nix initScript binPackage postgresqlConfig];
-                  pathsToLink = [ "/bin" "/etc" "/var" "/share" ];
+                  name = "image-root";
+                  paths = [ data run pkgs.coreutils pkgs.which pkgs.bash pkgs.nix pkgs.less initScript binPackage postgresqlConfig pkgs.dockerTools.binSh pkgs.sudo ];
+                  pathsToLink = [ "/bin" "/etc" "/var" "/share" "/data" "/run" ];
                 })
                 mkUser
               ];
 
-              # perms = [{
-              #   path = mkUser;
-              #   regex = "/home/${user}";
-              #   mode = "0744";
-              #   uid = l.toInt uid;
-              #   gid = l.toInt gid;
-              #   uname = user;
-              #   gname = group;
-              # }];
+              perms = [
+              {
+                path = data;
+                regex = "";
+                mode = "0744";
+                uid = l.toInt uid;
+                gid = l.toInt gid;
+                uname = user;
+                gname = group;
+              }
+              {
+                path = pgconf;
+                regex = "";
+                mode = "0744";
+                uid = l.toInt uid;
+                gid = l.toInt gid;
+                uname = user;
+                gname = group;
+              }
+              {
+                path = run;
+                regex = "";
+                mode = "0744";
+                uid = l.toInt uid;
+                gid = l.toInt gid;
+                uname = user;
+                gname = group;
+              }
+              ];
 
               config = {
-                Entrypoint = [ "${entrypoint}/bin/entrypoint" ];
+                Entrypoint = ["/bin/init.sh"];
                 User = "postgres";
-                WorkingDir = "/home/postgres";
+                WorkingDir = "/data";
                 Env = [
-                  "HOME=/home/postgres"
                   "NIX_PAGER=cat"
                   "USER=postgres"
+                  "PGDATA=/data/postgresql"
+                  "PGHOST=/run/postgresql"
                 ];
+                ExposedPorts = { "${pgsqlDefaultPort}/tcp" = {}; };
+                Volumes = { "/data" = { }; };
               };
             };
           
@@ -333,7 +309,6 @@
           bin = makePostgresBin version;
           exts = makeOurPostgresPkgsSet version;
           docker = makePostgresDocker version bin;
-          docker2 = makePostgresDocker2 version bin;
           recurseForDerivations = true;
         };
 
