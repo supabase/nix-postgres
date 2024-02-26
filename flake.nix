@@ -73,7 +73,6 @@
           "timescaledb"
           "wal2json"
           /* pljava */
-          #"plv8"
           "rum"
           "pg_repack"
           "pgroonga"

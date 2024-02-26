@@ -3,7 +3,7 @@
 
 [ ! -z "$DEBUG" ] && set -x
 
-# first argument should be '14', '15' or '16' for the version
+# first argument should be '15' or '16' for the version
 if [ "$1" == "15" ]; then
     echo "Starting server for PSQL 15"
     PSQL15=@PSQL15_BINDIR@
