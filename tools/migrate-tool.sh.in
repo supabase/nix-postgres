@@ -16,7 +16,7 @@ elif [ "$1" == "16" ]; then
     PSQL16=@PSQL16_BINDIR@
     OLDVER="$PSQL16"
 else
-    echo "Please provide a valid Postgres version (14, 15 or 16), or a /nix/store path"
+    echo "Please provide a valid Postgres version (15 or 16), or a /nix/store path"
     exit 1
 fi
 
