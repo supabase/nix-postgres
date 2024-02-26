@@ -14,9 +14,7 @@ buildPgrxExtension_0_11_2 rec {
     rev    = "lock-resolution"; 
     hash   = "sha256-xzquqZqLxHzCbzCUZ0SlD+ObpJsaLJ9KFERtE+SOtdM=";
   };
-
-  #src = /home/sam/wrappers;
-  
+ 
   nativeBuildInputs = [ pkg-config ];
   buildInputs = [ openssl ];
 
