@@ -10,13 +10,13 @@ let
   #
   # this seems to all be cleaned up in version 2.0 of the extension, so ideally
   # we could upgrade to it later on and nuke this.
-  sqlFilename = if lib.versionOlder postgresql.version "14"
-    then "pg_stat_monitor--1.0.13.sql.in"
-    else "pg_stat_monitor--1.0.14.sql.in";
+  # sqlFilename = if lib.versionOlder postgresql.version "14"
+  #   then "pg_stat_monitor--1.0.13.sql.in"
+  #   else "pg_stat_monitor--1.0.14.sql.in";
 
 in stdenv.mkDerivation rec {
   pname = "pg_stat_monitor";
-  version = "1.0.1";
+  version = "2.0.4";
 
   buildInputs = [ postgresql ];
 
@@ -24,7 +24,7 @@ in stdenv.mkDerivation rec {
     owner  = "percona";
     repo   = pname;
     rev    = "refs/tags/${version}";
-    hash   = "sha256-sQEpIknAFOmvNTX2G23X4BvMdy3Ms7sXx7hLZt8jyUk=";
+    hash   = "sha256-57Ji/KltIHNf81OxT0+4JIDqydST5RKMqrybNBZochg=";
   };
 
   makeFlags = [ "USE_PGXS=1" ];
@@ -32,7 +32,7 @@ in stdenv.mkDerivation rec {
   installPhase = ''
     mkdir -p $out/{lib,share/postgresql/extension}
   
-    cp ${sqlFilename} pg_stat_monitor--1.0.sql
+    cp pg_stat_monitor--2.0.sql pg_stat_monitor--1.0--2.0.sql
   
     cp *.so      $out/lib
     cp *.sql     $out/share/postgresql/extension
@@ -45,6 +45,6 @@ in stdenv.mkDerivation rec {
     maintainers = with maintainers; [ thoughtpolice ];
     platforms   = postgresql.meta.platforms;
     license     = licenses.postgresql;
-    broken      = lib.versionOlder postgresql.version "13";
+    broken      = lib.versionOlder postgresql.version "15";
   };
 }
