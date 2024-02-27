@@ -31,8 +31,9 @@ elif [ "$2" == "15" ]; then
     PSQL15=@PSQL15_BINDIR@
     NEWVER="$PSQL15"
 elif [ "$2" == "16" ]; then
-    PSQL15=@PSQL16_BINDIR@
+    PSQL16=@PSQL16_BINDIR@
     NEWVER="$PSQL16"
+    echo "NEWVER IS $NEWVER"
 else
     echo "Please provide a valid Postgres version (15 or 16), or a /nix/store path"
     exit 1
