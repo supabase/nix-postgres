@@ -1,4 +1,4 @@
-l!/usr/bin/env bash
+#!/usr/bin/env bash
 # shellcheck shell=bash
 
 [ ! -z "$DEBUG" ] && set -x
