@@ -3,17 +3,17 @@
 
 [ ! -z "$DEBUG" ] && set -x
 
-# first argument should be '14' or '15' for the version
-if [ "$1" == "14" ]; then
-    echo "Starting server for PSQL 14"
-    PSQL14=@PSQL14_BINDIR@
-    BINDIR="$PSQL14"
-elif [ "$1" == "15" ]; then
+# first argument should be '15' or '16' for the version
+if [ "$1" == "15" ]; then
     echo "Starting server for PSQL 15"
     PSQL15=@PSQL15_BINDIR@
     BINDIR="$PSQL15"
+elif [ "$1" == "16" ]; then
+    echo "Starting server for PSQL 16"
+    PSQL16=@PSQL16_BINDIR@
+    BINDIR="$PSQL16"
 else
-    echo "Please provide a valid Postgres version (14 or 15)"
+    echo "Please provide a valid Postgres version (15 or 16)"
     exit 1
 fi
 

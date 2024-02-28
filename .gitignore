@@ -12,3 +12,7 @@ result*
 # shell history
 .history
 container.sh
+sbom.spdx.json
+sbom.cdx.json
+sbom.csv
+graph*.png

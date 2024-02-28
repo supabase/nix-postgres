@@ -1,19 +1,20 @@
 { lib, stdenv, fetchFromGitHub, openssl, pkg-config
-, postgresql, buildPgrxExtension_0_11_0
+, postgresql, buildPgrxExtension_0_11_2
 }:
 
-buildPgrxExtension_0_11_0 rec {
+buildPgrxExtension_0_11_2 rec {
   pname = "supabase-wrappers";
-  version = "unstable-2024-02-14";
+  version = "unstable-2024-02-26";
   inherit postgresql;
 
   src = fetchFromGitHub {
     owner  = "supabase";
     repo   = "wrappers";
-    rev    = "v0.2.0";
-    hash   = "sha256-F+S5uyubL3Tb3RTJ08Zf9gN8oLE/WkCWFA8RcKkDqes=";
+    #rev pinned for now to the HEAD of the main branch to achieve cargo-pgrx 0.11.2 compat
+    rev    = "5b5c2622268c75bec834a38b2ff967f781511188"; 
+    hash   = "sha256-VwEFJD0yD+gvXCTzq9NfjCPEkh/lDQdEOPfk8LwK4z4=";
   };
-
+ 
   nativeBuildInputs = [ pkg-config ];
   buildInputs = [ openssl ];
 
@@ -21,7 +22,7 @@ buildPgrxExtension_0_11_0 rec {
   OPENSSL_NO_VENDOR = 1;
 
   cargoLock = {
-    lockFile = "${src}/wrappers/Cargo.lock";
+    lockFile = "${src}/Cargo.lock";
     outputHashes = {
       "clickhouse-rs-1.0.0-alpha.1" = "sha256-0zmoUo/GLyCKDLkpBsnLAyGs1xz6cubJhn+eVqMEMaw=";
     };

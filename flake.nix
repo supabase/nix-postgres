@@ -73,7 +73,6 @@
           "timescaledb"
           "wal2json"
           /* pljava */
-          "plv8"
           "rum"
           "pg_repack"
           "pgroonga"
@@ -89,7 +88,9 @@
         # rollout new versions of these critical things easier without having to
         # go through the upstream release engineering process.
         ourExtensions = [
-          ./ext/citus.nix
+          # see comment in ./ext/citus.nix
+          # for why citus is deactivated
+          #./ext/citus.nix
           ./ext/pgsql-http.nix
           ./ext/pg_plan_filter.nix
           ./ext/pg_net.nix
@@ -104,6 +105,7 @@
           ./ext/pg_tle.nix
           ./ext/wrappers/default.nix
           ./ext/supautils.nix
+          ./ext/plv8.nix
         ];
 
         # Create a 'receipt' file for a given postgresql package. This is a way
@@ -159,7 +161,7 @@
         # it refers to the *major number only*, which is used to select the
         # correct version of the package from nixpkgs. This is because we want
         # to be able to do so in an open ended way. As an example, the version
-        # "14" passed in will use the nixpkgs package "postgresql_14" as the
+        # "15" passed in will use the nixpkgs package "postgresql_15" as the
         # basis for building extensions, etc.
         makePostgresBin = version:
           let
@@ -318,8 +320,8 @@
         # want.
         basePackages = {
           # PostgreSQL versions.
-          psql_14 = makePostgres "14";
           psql_15 = makePostgres "15";
+          psql_16 = makePostgres "16";
 
           # Start a version of the server.
           start-server =
@@ -332,8 +334,8 @@
               substitute ${./tools/run-server.sh.in} $out/bin/start-postgres-server \
                 --subst-var-by 'PGSQL_DEFAULT_PORT' '${pgsqlDefaultPort}' \
                 --subst-var-by 'PGSQL_SUPERUSER' '${pgsqlSuperuser}' \
-                --subst-var-by 'PSQL14_BINDIR' '${basePackages.psql_14.bin}' \
                 --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}' \
+                --subst-var-by 'PSQL16_BINDIR' '${basePackages.psql_16.bin}' \
                 --subst-var-by 'PSQL_CONF_FILE' '${configFile}' \
                 --subst-var-by 'PGSODIUM_GETKEY' '${getkeyScript}'
 
@@ -346,8 +348,8 @@
             substitute ${./tools/run-client.sh.in} $out/bin/start-postgres-client \
               --subst-var-by 'PGSQL_DEFAULT_PORT' '${pgsqlDefaultPort}' \
               --subst-var-by 'PGSQL_SUPERUSER' '${pgsqlSuperuser}' \
-              --subst-var-by 'PSQL14_BINDIR' '${basePackages.psql_14.bin}' \
-              --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}'
+              --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}'\
+              --subst-var-by 'PSQL16_BINDIR' '${basePackages.psql_16.bin}'
             chmod +x $out/bin/start-postgres-client
           '';
 
@@ -361,8 +363,8 @@
             in pkgs.runCommand "migrate-postgres" {} ''
               mkdir -p $out/bin
               substitute ${./tools/migrate-tool.sh.in} $out/bin/migrate-postgres \
-                --subst-var-by 'PSQL14_BINDIR' '${basePackages.psql_14.bin}' \
                 --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}' \
+                --subst-var-by 'PSQL16_BINDIR' '${basePackages.psql_16.bin}' \
                 --subst-var-by 'PSQL_CONF_FILE' '${configFile}' \
                 --subst-var-by 'PGSODIUM_GETKEY' '${getkeyScript}' \
                 --subst-var-by 'PRIMING_SCRIPT' '${primingScript}' \
@@ -375,8 +377,8 @@
             mkdir -p $out/bin
             substitute ${./tools/run-replica.sh.in} $out/bin/start-postgres-replica \
               --subst-var-by 'PGSQL_SUPERUSER' '${pgsqlSuperuser}' \
-              --subst-var-by 'PSQL14_BINDIR' '${basePackages.psql_14.bin}' \
-              --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}'
+              --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}'\
+              --subst-var-by 'PSQL16_BINDIR' '${basePackages.psql_16.bin}'
             chmod +x $out/bin/start-postgres-replica
           '';
         };
@@ -416,14 +418,14 @@
           # set can go here.
           inherit (pkgs)
             # NOTE: comes from our cargo-pgrx.nix overlay
-            cargo-pgrx_0_11_0;
+            cargo-pgrx_0_11_2;
         };
 
         # The list of exported 'checks' that are run with every run of 'nix
         # flake check'. This is run in the CI system, as well.
         checks = {
-          psql_14 = makeCheckHarness basePackages.psql_14.bin;
           psql_15 = makeCheckHarness basePackages.psql_15.bin;
+          psql_16 = makeCheckHarness basePackages.psql_16.bin;
         };
 
         # Apps is a list of names of things that can be executed with 'nix run';

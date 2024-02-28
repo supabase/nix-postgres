@@ -2,17 +2,17 @@
 
 buildPgrxExtension rec {
   pname = "pg_graphql";
-  version = "unstable-1.4.0";
+  version = "unstable-1.5.0";
   inherit postgresql;
 
   src = fetchFromGitHub {
     owner  = "supabase";
     repo   = pname;
-    rev    = "v1.4.0";
-    hash   = "sha256-vpMNN7xKCFCqCsMHNOpWbeNYfUCREszBLSxPl3iBFLM=";
+    rev    = "v1.5.0";
+    hash   = "sha256-28ANRZyF22qF2YAxNAAkPfGOM3+xiO6IHdXsTp0CTQE=";
   };
 
-  cargoHash = "sha256-jB5cV6r4sf3TBlR9Zsrb7hZp25fIc0DcKvIetYut2ZU=";
+  cargoHash = "sha256-CUiGs0m9aUeqjpdPyOSjz91cP7TT6kjJqnw7ImGnQuo=";
 
   # FIXME (aseipp): disable the tests since they try to install .control
   # files into the wrong spot, aside from that the one main test seems

@@ -2,39 +2,40 @@
 
 [ ! -z "$DEBUG" ] && set -x
 
-# first argument is the old version; a path, or 14 or 15
+# first argument is the old version; a path 15 or 16
 if [[ $1 == /nix/store* ]]; then
     if [ ! -L "$1/receipt.json" ] || [ ! -e "$1/receipt.json" ]; then
         echo "ERROR: $1 does not look like a valid Postgres install"
         exit 1
     fi
     OLDVER="$1"
-elif [ "$1" == "14" ]; then
-    PSQL14=@PSQL14_BINDIR@
-    OLDVER="$PSQL14"
 elif [ "$1" == "15" ]; then
     PSQL15=@PSQL15_BINDIR@
     OLDVER="$PSQL15"
+elif [ "$1" == "16" ]; then
+    PSQL16=@PSQL16_BINDIR@
+    OLDVER="$PSQL16"
 else
-    echo "Please provide a valid Postgres version (14 or 15), or a /nix/store path"
+    echo "Please provide a valid Postgres version (15 or 16), or a /nix/store path"
     exit 1
 fi
 
-# second argument is the new version; 14 or 15
+# second argument is the new version; 15 or 16
 if [[ $2 == /nix/store* ]]; then
     if [ ! -L "$2/receipt.json" ] || [ ! -e "$2/receipt.json" ]; then
         echo "ERROR: $1 does not look like a valid Postgres install"
         exit 1
     fi
     NEWVER="$2"
-elif [ "$2" == "14" ]; then
-    PSQL14=@PSQL14_BINDIR@
-    NEWVER="$PSQL14"
 elif [ "$2" == "15" ]; then
     PSQL15=@PSQL15_BINDIR@
     NEWVER="$PSQL15"
+elif [ "$2" == "16" ]; then
+    PSQL16=@PSQL16_BINDIR@
+    NEWVER="$PSQL16"
+    echo "NEWVER IS $NEWVER"
 else
-    echo "Please provide a valid Postgres version (14 or 15), or a /nix/store path"
+    echo "Please provide a valid Postgres version (15 or 16), or a /nix/store path"
     exit 1
 fi
 

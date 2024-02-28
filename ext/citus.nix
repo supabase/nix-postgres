@@ -1,8 +1,10 @@
 { lib, curl, lz4, zstd, krb5, icu, stdenv, fetchFromGitHub, postgresql }:
-
+#FIXME we have decided deactivate this for now, as it is not used in production
+# if we decide to use it later we may need to look at this documentation 
+# https://docs.citusdata.com/en/stable/admin_guide/upgrading_citus.html#upgrading-postgresql-version-from-15-to-16
 stdenv.mkDerivation rec {
   pname = "citus";
-  version = "12.0.0";
+  version = "12.1.2";
 
   buildInputs = [ curl lz4 zstd krb5 icu.dev postgresql];
 
@@ -10,7 +12,7 @@ stdenv.mkDerivation rec {
     owner  = "citusdata";
     repo   = pname;
     rev    = "refs/tags/v${version}";
-    hash   = "sha256-HH9/slsCRe2yIVIqwR8sDyqXFonf8BHhJhLzHNv1CF0=";
+    hash   = "sha256-0uYNMLAYigtGlDRvOEkQeC5i58QfXcdSVjTQwWVFX+8=";
   };
 
   installPhase = ''
