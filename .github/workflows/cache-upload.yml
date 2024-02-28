@@ -40,7 +40,7 @@ jobs:
 
       - name: build and copy to S3
         run: |
-          for x in 14 15; do
+          for x in 15 16; do
             nix build .#psql_$x/bin -o result-$x
           done
           nix copy --to s3://nix-postgres-artifacts?secret-key=nix-secret-key ./result*
