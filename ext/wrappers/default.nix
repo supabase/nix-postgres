@@ -8,11 +8,11 @@ buildPgrxExtension_0_11_2 rec {
   inherit postgresql;
 
   src = fetchFromGitHub {
-    owner  = "samrose";
+    owner  = "supabase";
     repo   = "wrappers";
     #rev pinned for now to the HEAD of the main branch to achieve cargo-pgrx 0.11.2 compat
-    rev    = "lock-resolution"; 
-    hash   = "sha256-xzquqZqLxHzCbzCUZ0SlD+ObpJsaLJ9KFERtE+SOtdM=";
+    rev    = "5b5c2622268c75bec834a38b2ff967f781511188"; 
+    hash   = "sha256-VwEFJD0yD+gvXCTzq9NfjCPEkh/lDQdEOPfk8LwK4z4=";
   };
  
   nativeBuildInputs = [ pkg-config ];
@@ -22,7 +22,7 @@ buildPgrxExtension_0_11_2 rec {
   OPENSSL_NO_VENDOR = 1;
 
   cargoLock = {
-    lockFile = "${src}/wrappers/Cargo.lock";
+    lockFile = "${src}/Cargo.lock";
     outputHashes = {
       "clickhouse-rs-1.0.0-alpha.1" = "sha256-0zmoUo/GLyCKDLkpBsnLAyGs1xz6cubJhn+eVqMEMaw=";
     };
