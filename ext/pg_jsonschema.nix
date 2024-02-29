@@ -2,17 +2,17 @@
 
 buildPgrxExtension rec {
   pname = "pg_jsonschema";
-  version = "unstable-e8c331f106a7970eaa406b844c83c259ff2f0e84";
+  version = "unstable-v0.3.0";
   inherit postgresql;
 
   src = fetchFromGitHub {
     owner  = "supabase";
     repo   = pname;
-    rev    = "e8c331f106a7970eaa406b844c83c259ff2f0e84";
-    hash   = "sha256-Z88cKMhkCkLKaeP5oFMJNxojIPfrOyPTBfCM0TKOi0E=";
+    rev    = "v0.3.0";
+    hash   = "sha256-am6Ye+pOoAsOr9L4vJXw4iIOJ9x0VkUjqH6PdXMUZrk=";
   };
 
-  cargoHash = "sha256-i05gkqyBIH+xkAognSKouyA08B2kKZ/W94t5QgG/BHA=";
+  cargoHash = "sha256-tiiWzu/mTKL5ruvWn6IxrXVhVqS4LXzjfacdFT9rbOY=";
 
   # FIXME (aseipp): testsuite tries to write files into /nix/store; we'll have
   # to fix this a bit later.
