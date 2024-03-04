@@ -419,7 +419,6 @@
               substitute ${./tools/migrate-tool.sh.in} $out/bin/migrate-postgres \
                 --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}' \
                 --subst-var-by 'PSQL16_BINDIR' '${basePackages.psql_16.bin}' \
-                --subst-var-by 'PSQLORIOLEDB16_BINDIR' '${basePackages.psql_orioledb_16.bin}' \
                 --subst-var-by 'PSQL_CONF_FILE' '${configFile}' \
                 --subst-var-by 'PGSODIUM_GETKEY' '${getkeyScript}' \
                 --subst-var-by 'PRIMING_SCRIPT' '${primingScript}' \
@@ -433,8 +432,7 @@
             substitute ${./tools/run-replica.sh.in} $out/bin/start-postgres-replica \
               --subst-var-by 'PGSQL_SUPERUSER' '${pgsqlSuperuser}' \
               --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}'\
-              --subst-var-by 'PSQL16_BINDIR' '${basePackages.psql_16.bin}' \
-              --subst-var-by 'PSQLORIOLEDB16_BINDIR' '${basePackages.psql_orioledb_16.bin}'
+              --subst-var-by 'PSQL16_BINDIR' '${basePackages.psql_16.bin}' 
             chmod +x $out/bin/start-postgres-replica
           '';
         };
@@ -466,6 +464,7 @@
 
             pkill postgres
             mv logfile $out
+            echo ${pgpkg}
           '';
 
       in
