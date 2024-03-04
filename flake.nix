@@ -44,6 +44,7 @@
             # explicit is better.
             (import ./overlays/cargo-pgrx.nix)
             (import ./overlays/gdal-small.nix)
+            (import ./overlays/psql_16-oriole.nix)
           ];
         };
 
@@ -111,7 +112,8 @@
           ./ext/supautils.nix
           ./ext/plv8.nix
         ];
-
+        #TODO add the orioledb extension
+        orioledbExtension = ourExtensions ++ [];
         # Create a 'receipt' file for a given postgresql package. This is a way
         # of adding a bit of metadata to the package, which can be used by other
         # tools to inspect what the contents of the install are: the PSQL
@@ -152,6 +154,10 @@
           let postgresql = pkgs."postgresql_${version}";
           in map (path: pkgs.callPackage path { inherit postgresql; }) ourExtensions;
 
+        makeOurOrioleDbPostgresPkgs = version:
+          let postgresql = pkgs.pg16_oriole;
+          in map (path: pkgs.callPackage path { inherit postgresql; }) orioledbExtension;
+
         # Create an attrset that contains all the extensions included in a server.
         makeOurPostgresPkgsSet = version:
           (builtins.listToAttrs (map
@@ -159,6 +165,15 @@
               { name = drv.pname; value = drv; }
             )
             (makeOurPostgresPkgs version)))
+          // { recurseForDerivations = true; };
+
+        # Create an attrset that contains all the extensions included in a server.
+        makeOurOrioleDbPostgresPkgsSet = version:
+          (builtins.listToAttrs (map
+            (drv:
+              { name = drv.pname; value = drv; }
+            )
+            (makeOurOrioleDbPostgresPkgs version)))
           // { recurseForDerivations = true; };
 
         # Create a binary distribution of PostgreSQL, given a version.
@@ -182,6 +197,26 @@
 
             pgbin = postgresql.withPackages (ps:
               (map (ext: ps."${ext}") psqlExtensions) ++ (makeOurPostgresPkgs version)
+            );
+          in
+          pkgs.symlinkJoin {
+            inherit (pgbin) name version;
+            paths = [ pgbin (makeReceipt pgbin upstreamExts ourExts) ];
+          };
+
+        makeOrioleDbPostgresBin = version:
+          let
+            postgresql = pkgs.pg16_oriole;
+            upstreamExts = map
+              (ext: {
+                name = postgresql.pkgs."${ext}".pname;
+                version = postgresql.pkgs."${ext}".version;
+              })
+              psqlExtensions;
+            ourExts = map (ext: { name = ext.pname; version = ext.version; }) (makeOurOrioleDbPostgresPkgs version);
+
+            pgbin = postgresql.withPackages (ps:
+              (map (ext: ps."${ext}") psqlExtensions) ++ (makeOurOrioleDbPostgresPkgs version)
             );
           in
           pkgs.symlinkJoin {
@@ -322,6 +357,12 @@
           docker = makePostgresDocker version bin;
           recurseForDerivations = true;
         };
+        makeOrioleDbPostgres = version: rec {
+          bin = makeOrioleDbPostgresBin version;
+          exts = makeOurOrioleDbPostgresPkgsSet version;
+          docker = makePostgresDocker version bin;
+          recurseForDerivations = true;
+        };
 
         # The base set of packages that we export from this Nix Flake, that can
         # be used with 'nix build'. Don't use the names listed below; check the
@@ -331,6 +372,7 @@
           # PostgreSQL versions.
           psql_15 = makePostgres "15";
           psql_16 = makePostgres "16";
+          psql_orioledb_16 = makeOrioleDbPostgres "16";
 
           # Start a version of the server.
           start-server =
@@ -432,6 +474,7 @@
           inherit (pkgs)
             # NOTE: comes from our cargo-pgrx.nix overlay
             cargo-pgrx_0_11_2;
+
         };
 
         # The list of exported 'checks' that are run with every run of 'nix
