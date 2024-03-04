@@ -75,12 +75,12 @@
           "pgjwt"
           "plpgsql_check"
           "pg_safeupdate"
-          /*"timescaledb"*/
           "wal2json"
           /* pljava */
           "rum"
           "pg_repack"
           "pgroonga"
+          "timescaledb"
         ];
 
         # Custom extensions that exist in our repository. These aren't upstream
@@ -112,8 +112,8 @@
           ./ext/supautils.nix
           ./ext/plv8.nix
         ];
-        #TODO add the orioledb extension
-        orioledbExtension = ourExtensions ++ [ ];
+
+        orioledbExtension = ourExtensions ++ [./ext/orioledb.nix ];
         # Create a 'receipt' file for a given postgresql package. This is a way
         # of adding a bit of metadata to the package, which can be used by other
         # tools to inspect what the contents of the install are: the PSQL
