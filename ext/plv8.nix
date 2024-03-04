@@ -4,7 +4,7 @@
 , v8
 , perl
 , postgresql
-# For test
+  # For test
 , runCommand
 , coreutils
 , gnugrep
@@ -77,8 +77,9 @@ stdenv.mkDerivation (finalAttrs: {
         postgresqlWithSelf = postgresql.withPackages (_: [
           finalAttrs.finalPackage
         ]);
-      in {
-        smoke = runCommand "plv8-smoke-test" {} ''
+      in
+      {
+        smoke = runCommand "plv8-smoke-test" { } ''
           export PATH=${lib.makeBinPath [
             postgresqlWithSelf
             coreutils

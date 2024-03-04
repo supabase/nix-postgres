@@ -6,10 +6,10 @@ buildPgrxExtension rec {
   inherit postgresql;
 
   src = fetchFromGitHub {
-    owner  = "supabase";
-    repo   = pname;
-    rev    = "v0.3.0";
-    hash   = "sha256-am6Ye+pOoAsOr9L4vJXw4iIOJ9x0VkUjqH6PdXMUZrk=";
+    owner = "supabase";
+    repo = pname;
+    rev = "v0.3.0";
+    hash = "sha256-am6Ye+pOoAsOr9L4vJXw4iIOJ9x0VkUjqH6PdXMUZrk=";
   };
 
   cargoHash = "sha256-tiiWzu/mTKL5ruvWn6IxrXVhVqS4LXzjfacdFT9rbOY=";
@@ -20,9 +20,9 @@ buildPgrxExtension rec {
 
   meta = with lib; {
     description = "JSON Schema Validation for PostgreSQL";
-    homepage    = "https://github.com/supabase/${pname}";
+    homepage = "https://github.com/supabase/${pname}";
     maintainers = with maintainers; [ thoughtpolice ];
-    platforms   = postgresql.meta.platforms;
-    license     = licenses.postgresql;
+    platforms = postgresql.meta.platforms;
+    license = licenses.postgresql;
   };
 }

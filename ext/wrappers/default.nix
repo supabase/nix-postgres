@@ -1,5 +1,10 @@
-{ lib, stdenv, fetchFromGitHub, openssl, pkg-config
-, postgresql, buildPgrxExtension_0_11_2
+{ lib
+, stdenv
+, fetchFromGitHub
+, openssl
+, pkg-config
+, postgresql
+, buildPgrxExtension_0_11_2
 }:
 
 buildPgrxExtension_0_11_2 rec {
@@ -8,13 +13,13 @@ buildPgrxExtension_0_11_2 rec {
   inherit postgresql;
 
   src = fetchFromGitHub {
-    owner  = "supabase";
-    repo   = "wrappers";
+    owner = "supabase";
+    repo = "wrappers";
     #rev pinned for now to the HEAD of the main branch to achieve cargo-pgrx 0.11.2 compat
-    rev    = "5b5c2622268c75bec834a38b2ff967f781511188"; 
-    hash   = "sha256-VwEFJD0yD+gvXCTzq9NfjCPEkh/lDQdEOPfk8LwK4z4=";
+    rev = "5b5c2622268c75bec834a38b2ff967f781511188";
+    hash = "sha256-VwEFJD0yD+gvXCTzq9NfjCPEkh/lDQdEOPfk8LwK4z4=";
   };
- 
+
   nativeBuildInputs = [ pkg-config ];
   buildInputs = [ openssl ];
 
@@ -48,9 +53,9 @@ buildPgrxExtension_0_11_2 rec {
 
   meta = with lib; {
     description = "Various Foreign Data Wrappers (FDWs) for PostreSQL";
-    homepage    = "https://github.com/supabase/wrappers";
+    homepage = "https://github.com/supabase/wrappers";
     maintainers = with maintainers; [ thoughtpolice ];
-    platforms   = postgresql.meta.platforms;
-    license     = licenses.postgresql;
+    platforms = postgresql.meta.platforms;
+    license = licenses.postgresql;
   };
 }

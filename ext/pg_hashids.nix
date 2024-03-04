@@ -7,10 +7,10 @@ stdenv.mkDerivation rec {
   buildInputs = [ postgresql ];
 
   src = fetchFromGitHub {
-    owner  = "iCyberon";
-    repo   = pname;
-    rev    = "cd0e1b31d52b394a0df64079406a14a4f7387cd6";
-    hash   = "sha256-Nmb7XLqQflYZfqj0yrewfb1Hl5YgEB5wfjBunPwIuOU=";
+    owner = "iCyberon";
+    repo = pname;
+    rev = "cd0e1b31d52b394a0df64079406a14a4f7387cd6";
+    hash = "sha256-Nmb7XLqQflYZfqj0yrewfb1Hl5YgEB5wfjBunPwIuOU=";
   };
 
   installPhase = ''
@@ -23,9 +23,9 @@ stdenv.mkDerivation rec {
 
   meta = with lib; {
     description = "Generate short unique IDs in PostgreSQL";
-    homepage    = "https://github.com/iCyberon/pg_hashids";
+    homepage = "https://github.com/iCyberon/pg_hashids";
     maintainers = with maintainers; [ thoughtpolice ];
-    platforms   = postgresql.meta.platforms;
-    license     = licenses.postgresql;
+    platforms = postgresql.meta.platforms;
+    license = licenses.postgresql;
   };
 }

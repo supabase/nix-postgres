@@ -17,16 +17,19 @@
     ];
   };
 
-  outputs = { self, nixpkgs, flake-utils, nix2container }: let
-    gitRev = "vcs=${self.shortRev or "dirty"}+${builtins.substring 0 8 (self.lastModifiedDate or self.lastModified or "19700101")}";
+  outputs = { self, nixpkgs, flake-utils, nix2container }:
+    let
+      gitRev = "vcs=${self.shortRev or "dirty"}+${builtins.substring 0 8 (self.lastModifiedDate or self.lastModified or "19700101")}";
 
-    ourSystems = with flake-utils.lib; [
-      system.x86_64-linux
-      system.aarch64-linux
-    ]; in flake-utils.lib.eachSystem ourSystems (system:
+      ourSystems = with flake-utils.lib; [
+        system.x86_64-linux
+        system.aarch64-linux
+      ];
+    in
+    flake-utils.lib.eachSystem ourSystems (system:
       let
         pgsqlDefaultPort = "5435";
-        pgsqlSuperuser   = "postgres";
+        pgsqlSuperuser = "postgres";
         nix2img = nix2container.packages.${system}.nix2container;
 
         # The 'pkgs' variable holds all the upstream packages in nixpkgs, which
@@ -47,9 +50,10 @@
         # FIXME (aseipp): pg_prove is yet another perl program that needs
         # LOCALE_ARCHIVE set in non-NixOS environments. upstream this. once that's done, we
         # can remove this wrapper.
-        pg_prove = pkgs.runCommand "pg_prove" {
-          nativeBuildInputs = [ pkgs.makeWrapper ];
-        } ''
+        pg_prove = pkgs.runCommand "pg_prove"
+          {
+            nativeBuildInputs = [ pkgs.makeWrapper ];
+          } ''
           mkdir -p $out/bin
           for x in pg_prove pg_tapgen; do
             makeWrapper "${pkgs.perlPackages.TAPParserSourceHandlerpgTAP}/bin/$x" "$out/bin/$x" \
@@ -150,9 +154,11 @@
 
         # Create an attrset that contains all the extensions included in a server.
         makeOurPostgresPkgsSet = version:
-          (builtins.listToAttrs (map (drv:
-            { name = drv.pname; value = drv; }
-          ) (makeOurPostgresPkgs version)))
+          (builtins.listToAttrs (map
+            (drv:
+              { name = drv.pname; value = drv; }
+            )
+            (makeOurPostgresPkgs version)))
           // { recurseForDerivations = true; };
 
         # Create a binary distribution of PostgreSQL, given a version.
@@ -166,25 +172,28 @@
         makePostgresBin = version:
           let
             postgresql = pkgs."postgresql_${version}";
-            upstreamExts = map (ext: {
-              name = postgresql.pkgs."${ext}".pname;
-              version = postgresql.pkgs."${ext}".version;
-            }) psqlExtensions;
+            upstreamExts = map
+              (ext: {
+                name = postgresql.pkgs."${ext}".pname;
+                version = postgresql.pkgs."${ext}".version;
+              })
+              psqlExtensions;
             ourExts = map (ext: { name = ext.pname; version = ext.version; }) (makeOurPostgresPkgs version);
 
             pgbin = postgresql.withPackages (ps:
               (map (ext: ps."${ext}") psqlExtensions) ++ (makeOurPostgresPkgs version)
             );
-          in pkgs.symlinkJoin {
+          in
+          pkgs.symlinkJoin {
             inherit (pgbin) name version;
             paths = [ pgbin (makeReceipt pgbin upstreamExts ourExts) ];
           };
 
         # Make a Docker Image from a given PostgreSQL version and binary package.
         # updated to use https://github.com/nlewo/nix2container (samrose)
-          makePostgresDocker =  version: binPackage:
-            let
-            initScript = pkgs.runCommand "docker-init.sh" {} ''
+        makePostgresDocker = version: binPackage:
+          let
+            initScript = pkgs.runCommand "docker-init.sh" { } ''
               mkdir -p $out/bin
               substitute ${./docker/init.sh.in} $out/bin/init.sh \
                 --subst-var-by 'PGSQL_DEFAULT_PORT' '${pgsqlDefaultPort}'
@@ -192,65 +201,65 @@
               chmod +x $out/bin/init.sh
             '';
 
-            postgresqlConfig = pkgs.runCommand "postgresql.conf" {} ''
+            postgresqlConfig = pkgs.runCommand "postgresql.conf" { } ''
               mkdir -p $out/etc/
               substitute ${./tests/postgresql.conf.in} $out/etc/postgresql.conf \
                 --subst-var-by 'PGSQL_DEFAULT_PORT' '${pgsqlDefaultPort}' \
                 --subst-var-by PGSODIUM_GETKEY_SCRIPT "${./tests/util/pgsodium_getkey.sh}"
             '';
 
-              l = pkgs.lib // builtins;
+            l = pkgs.lib // builtins;
 
-              user = "postgres";
-              group = "postgres";
-              uid = "1001";
-              gid = "1001";
+            user = "postgres";
+            group = "postgres";
+            uid = "1001";
+            gid = "1001";
 
-              mkUser = pkgs.runCommand "mkUser" { } ''
-                mkdir -p $out/etc/pam.d
+            mkUser = pkgs.runCommand "mkUser" { } ''
+              mkdir -p $out/etc/pam.d
 
-                echo "${user}:x:${uid}:${gid}::" > $out/etc/passwd
-                echo "${user}:!x:::::::" > $out/etc/shadow
+              echo "${user}:x:${uid}:${gid}::" > $out/etc/passwd
+              echo "${user}:!x:::::::" > $out/etc/shadow
 
-                echo "${group}:x:${gid}:" > $out/etc/group
-                echo "${group}:x::" > $out/etc/gshadow
+              echo "${group}:x:${gid}:" > $out/etc/group
+              echo "${group}:x::" > $out/etc/gshadow
 
-                cat > $out/etc/pam.d/other <<EOF
-                account sufficient pam_unix.so
-                auth sufficient pam_rootok.so
-                password requisite pam_unix.so nullok sha512
-                session required pam_unix.so
-                EOF
+              cat > $out/etc/pam.d/other <<EOF
+              account sufficient pam_unix.so
+              auth sufficient pam_rootok.so
+              password requisite pam_unix.so nullok sha512
+              session required pam_unix.so
+              EOF
 
-                touch $out/etc/login.defs
-              '';
-              run = pkgs.runCommand "run" { } ''
-                mkdir -p $out/run/postgresql
-              '';
-              data = pkgs.runCommand "data" { } ''
-                mkdir -p $out/data/postgresql
-              '';
-              pgconf = pkgs.runCommand "pgconf" { } ''
-                mkdir -p $out/data/pgconf
-              '';
-            in
-            nix2img.buildImage {
-              name = "postgresql-${version}";
-              tag = "latest";
+              touch $out/etc/login.defs
+            '';
+            run = pkgs.runCommand "run" { } ''
+              mkdir -p $out/run/postgresql
+            '';
+            data = pkgs.runCommand "data" { } ''
+              mkdir -p $out/data/postgresql
+            '';
+            pgconf = pkgs.runCommand "pgconf" { } ''
+              mkdir -p $out/data/pgconf
+            '';
+          in
+          nix2img.buildImage {
+            name = "postgresql-${version}";
+            tag = "latest";
 
-              nixUid = l.toInt uid;
-              nixGid = l.toInt gid;
+            nixUid = l.toInt uid;
+            nixGid = l.toInt gid;
 
-              copyToRoot = [
-                (pkgs.buildEnv {
-                  name = "image-root";
-                  paths = [ data run pkgs.coreutils pkgs.which pkgs.bash pkgs.nix pkgs.less initScript binPackage postgresqlConfig pkgs.dockerTools.binSh pkgs.sudo ];
-                  pathsToLink = [ "/bin" "/etc" "/var" "/share" "/data" "/run" ];
-                })
-                mkUser
-              ];
+            copyToRoot = [
+              (pkgs.buildEnv {
+                name = "image-root";
+                paths = [ data run pkgs.coreutils pkgs.which pkgs.bash pkgs.nix pkgs.less initScript binPackage postgresqlConfig pkgs.dockerTools.binSh pkgs.sudo ];
+                pathsToLink = [ "/bin" "/etc" "/var" "/share" "/data" "/run" ];
+              })
+              mkUser
+            ];
 
-              perms = [
+            perms = [
               {
                 path = data;
                 regex = "";
@@ -278,23 +287,23 @@
                 uname = user;
                 gname = group;
               }
-              ];
+            ];
 
-              config = {
-                Entrypoint = ["/bin/init.sh"];
-                User = "postgres";
-                WorkingDir = "/data";
-                Env = [
-                  "NIX_PAGER=cat"
-                  "USER=postgres"
-                  "PGDATA=/data/postgresql"
-                  "PGHOST=/run/postgresql"
-                ];
-                ExposedPorts = { "${pgsqlDefaultPort}/tcp" = {}; };
-                Volumes = { "/data" = { }; };
-              };
+            config = {
+              Entrypoint = [ "/bin/init.sh" ];
+              User = "postgres";
+              WorkingDir = "/data";
+              Env = [
+                "NIX_PAGER=cat"
+                "USER=postgres"
+                "PGDATA=/data/postgresql"
+                "PGHOST=/run/postgresql"
+              ];
+              ExposedPorts = { "${pgsqlDefaultPort}/tcp" = { }; };
+              Volumes = { "/data" = { }; };
             };
-          
+          };
+
         # Create an attribute set, containing all the relevant packages for a
         # PostgreSQL install, wrapped up with a bow on top. There are three
         # packages:
@@ -329,7 +338,7 @@
               configFile = ./tests/postgresql.conf.in;
               getkeyScript = ./tests/util/pgsodium_getkey.sh;
             in
-            pkgs.runCommand "start-postgres-server" {} ''
+            pkgs.runCommand "start-postgres-server" { } ''
               mkdir -p $out/bin
               substitute ${./tools/run-server.sh.in} $out/bin/start-postgres-server \
                 --subst-var-by 'PGSQL_DEFAULT_PORT' '${pgsqlDefaultPort}' \
@@ -343,7 +352,7 @@
             '';
 
           # Start a version of the client.
-          start-client = pkgs.runCommand "start-postgres-client" {} ''
+          start-client = pkgs.runCommand "start-postgres-client" { } ''
             mkdir -p $out/bin
             substitute ${./tools/run-client.sh.in} $out/bin/start-postgres-client \
               --subst-var-by 'PGSQL_DEFAULT_PORT' '${pgsqlDefaultPort}' \
@@ -360,7 +369,8 @@
               getkeyScript = ./tests/util/pgsodium_getkey.sh;
               primingScript = ./tests/prime.sql;
               migrationData = ./tests/migrations/data.sql;
-            in pkgs.runCommand "migrate-postgres" {} ''
+            in
+            pkgs.runCommand "migrate-postgres" { } ''
               mkdir -p $out/bin
               substitute ${./tools/migrate-tool.sh.in} $out/bin/migrate-postgres \
                 --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}' \
@@ -373,7 +383,7 @@
               chmod +x $out/bin/migrate-postgres
             '';
 
-          start-replica = pkgs.runCommand "start-postgres-replica" {} ''
+          start-replica = pkgs.runCommand "start-postgres-replica" { } ''
             mkdir -p $out/bin
             substitute ${./tools/run-replica.sh.in} $out/bin/start-postgres-replica \
               --subst-var-by 'PGSQL_SUPERUSER' '${pgsqlSuperuser}' \
@@ -388,9 +398,11 @@
         makeCheckHarness = pgpkg:
           let
             sqlTests = ./tests/smoke;
-          in pkgs.runCommand "postgres-${pgpkg.version}-check-harness" {
-            nativeBuildInputs = with pkgs; [ coreutils bash pgpkg pg_prove procps ];
-          } ''
+          in
+          pkgs.runCommand "postgres-${pgpkg.version}-check-harness"
+            {
+              nativeBuildInputs = with pkgs; [ coreutils bash pgpkg pg_prove procps ];
+            } ''
             export PGDATA=/tmp/pgdata
             mkdir -p $PGDATA
             initdb --locale=C
@@ -410,7 +422,8 @@
             mv logfile $out
           '';
 
-      in rec {
+      in
+      rec {
         # The list of all packages that can be built with 'nix build'. The list
         # of names that can be used can be shown with 'nix flake show'
         packages = flake-utils.lib.flattenTree basePackages // {
@@ -437,12 +450,13 @@
               type = "app";
               program = "${basePackages."${attrName}"}/bin/${binName}";
             };
-          in {
-          start-server = mkApp "start-server" "start-postgres-server";
-          start-client = mkApp "start-client" "start-postgres-client";
-          start-replica = mkApp "start-replica" "start-postgres-replica";
-          migration-test = mkApp "migrate-tool" "migrate-postgres";
-        };
+          in
+          {
+            start-server = mkApp "start-server" "start-postgres-server";
+            start-client = mkApp "start-client" "start-postgres-client";
+            start-replica = mkApp "start-replica" "start-postgres-replica";
+            migration-test = mkApp "migrate-tool" "migrate-postgres";
+          };
 
         # 'devShells.default' lists the set of packages that are included in the
         # ambient $PATH environment when you run 'nix develop'. This is useful
@@ -450,8 +464,11 @@
         # reach.
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
-            coreutils just nix-update
-            pg_prove shellcheck
+            coreutils
+            just
+            nix-update
+            pg_prove
+            shellcheck
 
             basePackages.start-server
             basePackages.start-client

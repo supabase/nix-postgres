@@ -7,10 +7,10 @@ stdenv.mkDerivation rec {
   buildInputs = [ curl postgresql ];
 
   src = fetchFromGitHub {
-    owner  = "pramsey";
-    repo   = pname;
-    rev    = "refs/tags/v${version}";
-    hash   = "sha256-CPHfx7vhWfxkXsoKTzyFuTt47BPMvzi/pi1leGcuD60=";
+    owner = "pramsey";
+    repo = pname;
+    rev = "refs/tags/v${version}";
+    hash = "sha256-CPHfx7vhWfxkXsoKTzyFuTt47BPMvzi/pi1leGcuD60=";
   };
 
   installPhase = ''
@@ -23,9 +23,9 @@ stdenv.mkDerivation rec {
 
   meta = with lib; {
     description = "HTTP client for Postgres";
-    homepage    = "https://github.com/pramsey/${pname}";
+    homepage = "https://github.com/pramsey/${pname}";
     maintainers = with maintainers; [ thoughtpolice ];
-    platforms   = postgresql.meta.platforms;
-    license     = licenses.postgresql;
+    platforms = postgresql.meta.platforms;
+    license = licenses.postgresql;
   };
 }
