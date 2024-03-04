@@ -113,7 +113,7 @@
           ./ext/plv8.nix
         ];
         #TODO add the orioledb extension
-        orioledbExtension = ourExtensions ++ [];
+        orioledbExtension = ourExtensions ++ [ ];
         # Create a 'receipt' file for a given postgresql package. This is a way
         # of adding a bit of metadata to the package, which can be used by other
         # tools to inspect what the contents of the install are: the PSQL
