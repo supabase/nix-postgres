@@ -7,10 +7,10 @@ stdenv.mkDerivation rec {
   buildInputs = [ postgresql ];
 
   src = fetchFromGitHub {
-    owner  = "HypoPG";
-    repo   = pname;
-    rev    = "refs/tags/${version}";
-    hash   = "sha256-AIBXy+LxyHUo+1hd8gQTwaBdFiTEzKaCVc4cx5tZgME=";
+    owner = "HypoPG";
+    repo = pname;
+    rev = "refs/tags/${version}";
+    hash = "sha256-AIBXy+LxyHUo+1hd8gQTwaBdFiTEzKaCVc4cx5tZgME=";
   };
 
   installPhase = ''
@@ -23,9 +23,9 @@ stdenv.mkDerivation rec {
 
   meta = with lib; {
     description = "Hypothetical Indexes for PostgreSQL";
-    homepage    = "https://github.com/HypoPG/${pname}";
+    homepage = "https://github.com/HypoPG/${pname}";
     maintainers = with maintainers; [ thoughtpolice ];
-    platforms   = postgresql.meta.platforms;
-    license     = licenses.postgresql;
+    platforms = postgresql.meta.platforms;
+    license = licenses.postgresql;
   };
 }

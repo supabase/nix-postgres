@@ -7,10 +7,10 @@ stdenv.mkDerivation rec {
   buildInputs = [ postgresql ];
 
   src = fetchFromGitHub {
-    owner  = "supabase";
-    repo   = pname;
-    rev    = "refs/tags/v${version}";
-    hash   = "sha256-kXTngBW4K6FkZM8HvJG2Jha6OQqbejhnk7tchxy031I=";
+    owner = "supabase";
+    repo = pname;
+    rev = "refs/tags/v${version}";
+    hash = "sha256-kXTngBW4K6FkZM8HvJG2Jha6OQqbejhnk7tchxy031I=";
   };
 
   installPhase = ''
@@ -22,9 +22,9 @@ stdenv.mkDerivation rec {
 
   meta = with lib; {
     description = "Store encrypted secrets in PostgreSQL";
-    homepage    = "https://github.com/supabase/${pname}";
+    homepage = "https://github.com/supabase/${pname}";
     maintainers = with maintainers; [ thoughtpolice ];
-    platforms   = postgresql.meta.platforms;
-    license     = licenses.postgresql;
+    platforms = postgresql.meta.platforms;
+    license = licenses.postgresql;
   };
 }

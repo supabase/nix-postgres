@@ -7,10 +7,10 @@ stdenv.mkDerivation rec {
   buildInputs = [ postgresql ];
 
   src = fetchFromGitHub {
-    owner  = "pgvector";
-    repo   = pname;
-    rev    = "refs/tags/v${version}";
-    hash   = "sha256-ZNzq+dATZn9LUgeOczsaadr5hwdbt9y/+sAOPIdr77U=";
+    owner = "pgvector";
+    repo = pname;
+    rev = "refs/tags/v${version}";
+    hash = "sha256-ZNzq+dATZn9LUgeOczsaadr5hwdbt9y/+sAOPIdr77U=";
   };
 
   installPhase = ''
@@ -23,9 +23,9 @@ stdenv.mkDerivation rec {
 
   meta = with lib; {
     description = "Open-source vector similarity search for Postgres";
-    homepage    = "https://github.com/${src.owner}/${src.repo}";
+    homepage = "https://github.com/${src.owner}/${src.repo}";
     maintainers = with maintainers; [ olirice ];
-    platforms   = postgresql.meta.platforms;
-    license     = licenses.postgresql;
+    platforms = postgresql.meta.platforms;
+    license = licenses.postgresql;
   };
 }

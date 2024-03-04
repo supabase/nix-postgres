@@ -7,10 +7,10 @@ stdenv.mkDerivation rec {
   buildInputs = [ curl postgresql ];
 
   src = fetchFromGitHub {
-    owner  = "supabase";
-    repo   = pname;
-    rev    = "refs/tags/v${version}";
-    hash   = "sha256-9Ki3fyinHTYrfckxAY0fCTlzJd9l+n7QRUV7mIWrqmc=";
+    owner = "supabase";
+    repo = pname;
+    rev = "refs/tags/v${version}";
+    hash = "sha256-9Ki3fyinHTYrfckxAY0fCTlzJd9l+n7QRUV7mIWrqmc=";
   };
 
   installPhase = ''
@@ -23,9 +23,9 @@ stdenv.mkDerivation rec {
 
   meta = with lib; {
     description = "Async networking for Postgres";
-    homepage    = "https://github.com/supabase/pg_net";
+    homepage = "https://github.com/supabase/pg_net";
     maintainers = with maintainers; [ thoughtpolice ];
-    platforms   = postgresql.meta.platforms;
-    license     = licenses.postgresql;
+    platforms = postgresql.meta.platforms;
+    license = licenses.postgresql;
   };
 }

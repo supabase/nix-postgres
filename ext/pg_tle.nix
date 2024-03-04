@@ -8,10 +8,10 @@ stdenv.mkDerivation rec {
   buildInputs = [ postgresql ];
 
   src = fetchFromGitHub {
-    owner  = "aws";
-    repo   = pname;
-    rev    = "refs/tags/v${version}";
-    hash   = "sha256-W/7pLy/27VatCdzUh1NZ4K2FRMD1erfHiFV2eY2x2W0=";
+    owner = "aws";
+    repo = pname;
+    rev = "refs/tags/v${version}";
+    hash = "sha256-W/7pLy/27VatCdzUh1NZ4K2FRMD1erfHiFV2eY2x2W0=";
   };
 
   makeFlags = [ "FLEX=flex" ];
@@ -26,9 +26,9 @@ stdenv.mkDerivation rec {
 
   meta = with lib; {
     description = "Framework for 'Trusted Language Extensions' in PostgreSQL";
-    homepage    = "https://github.com/aws/${pname}";
+    homepage = "https://github.com/aws/${pname}";
     maintainers = with maintainers; [ thoughtpolice ];
-    platforms   = postgresql.meta.platforms;
-    license     = licenses.postgresql;
+    platforms = postgresql.meta.platforms;
+    license = licenses.postgresql;
   };
 }

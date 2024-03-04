@@ -14,17 +14,18 @@ let
   #   then "pg_stat_monitor--1.0.13.sql.in"
   #   else "pg_stat_monitor--1.0.14.sql.in";
 
-in stdenv.mkDerivation rec {
+in
+stdenv.mkDerivation rec {
   pname = "pg_stat_monitor";
   version = "2.0.4";
 
   buildInputs = [ postgresql ];
 
   src = fetchFromGitHub {
-    owner  = "percona";
-    repo   = pname;
-    rev    = "refs/tags/${version}";
-    hash   = "sha256-57Ji/KltIHNf81OxT0+4JIDqydST5RKMqrybNBZochg=";
+    owner = "percona";
+    repo = pname;
+    rev = "refs/tags/${version}";
+    hash = "sha256-57Ji/KltIHNf81OxT0+4JIDqydST5RKMqrybNBZochg=";
   };
 
   makeFlags = [ "USE_PGXS=1" ];
@@ -41,10 +42,10 @@ in stdenv.mkDerivation rec {
 
   meta = with lib; {
     description = "Query Performance Monitoring Tool for PostgreSQL";
-    homepage    = "https://github.com/percona/${pname}";
+    homepage = "https://github.com/percona/${pname}";
     maintainers = with maintainers; [ thoughtpolice ];
-    platforms   = postgresql.meta.platforms;
-    license     = licenses.postgresql;
-    broken      = lib.versionOlder postgresql.version "15";
+    platforms = postgresql.meta.platforms;
+    license = licenses.postgresql;
+    broken = lib.versionOlder postgresql.version "15";
   };
 }
