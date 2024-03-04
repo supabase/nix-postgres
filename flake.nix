@@ -75,7 +75,7 @@
           "pgjwt"
           "plpgsql_check"
           "pg_safeupdate"
-          "timescaledb"
+          /*"timescaledb"*/
           "wal2json"
           /* pljava */
           "rum"
@@ -387,6 +387,7 @@
                 --subst-var-by 'PGSQL_SUPERUSER' '${pgsqlSuperuser}' \
                 --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}' \
                 --subst-var-by 'PSQL16_BINDIR' '${basePackages.psql_16.bin}' \
+                --subst-var-by 'PSQLORIOLEDB16_BINDIR' '${basePackages.psql_orioledb_16.bin}' \
                 --subst-var-by 'PSQL_CONF_FILE' '${configFile}' \
                 --subst-var-by 'PGSODIUM_GETKEY' '${getkeyScript}'
 
@@ -400,7 +401,8 @@
               --subst-var-by 'PGSQL_DEFAULT_PORT' '${pgsqlDefaultPort}' \
               --subst-var-by 'PGSQL_SUPERUSER' '${pgsqlSuperuser}' \
               --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}'\
-              --subst-var-by 'PSQL16_BINDIR' '${basePackages.psql_16.bin}'
+              --subst-var-by 'PSQL16_BINDIR' '${basePackages.psql_16.bin}' \
+              --subst-var-by 'PSQLORIOLEDB16_BINDIR' '${basePackages.psql_orioledb_16.bin}'
             chmod +x $out/bin/start-postgres-client
           '';
 
@@ -417,6 +419,7 @@
               substitute ${./tools/migrate-tool.sh.in} $out/bin/migrate-postgres \
                 --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}' \
                 --subst-var-by 'PSQL16_BINDIR' '${basePackages.psql_16.bin}' \
+                --subst-var-by 'PSQLORIOLEDB16_BINDIR' '${basePackages.psql_orioledb_16.bin}' \
                 --subst-var-by 'PSQL_CONF_FILE' '${configFile}' \
                 --subst-var-by 'PGSODIUM_GETKEY' '${getkeyScript}' \
                 --subst-var-by 'PRIMING_SCRIPT' '${primingScript}' \
@@ -430,7 +433,8 @@
             substitute ${./tools/run-replica.sh.in} $out/bin/start-postgres-replica \
               --subst-var-by 'PGSQL_SUPERUSER' '${pgsqlSuperuser}' \
               --subst-var-by 'PSQL15_BINDIR' '${basePackages.psql_15.bin}'\
-              --subst-var-by 'PSQL16_BINDIR' '${basePackages.psql_16.bin}'
+              --subst-var-by 'PSQL16_BINDIR' '${basePackages.psql_16.bin}' \
+              --subst-var-by 'PSQLORIOLEDB16_BINDIR' '${basePackages.psql_orioledb_16.bin}'
             chmod +x $out/bin/start-postgres-replica
           '';
         };
@@ -482,6 +486,7 @@
         checks = {
           psql_15 = makeCheckHarness basePackages.psql_15.bin;
           psql_16 = makeCheckHarness basePackages.psql_16.bin;
+          psql_orioledb_16 = makeCheckHarness basePackages.psql_orioledb_16.bin;
         };
 
         # Apps is a list of names of things that can be executed with 'nix run';
