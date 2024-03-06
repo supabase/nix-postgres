@@ -18,3 +18,4 @@ sbom.csv
 graph*.png
 init.sh
 postgres*
+build.log

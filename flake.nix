@@ -32,10 +32,12 @@
         pgsqlSuperuser = "postgres";
         nix2img = nix2container.packages.${system}.nix2container;
 
-        # The 'pkgs' variable holds all the upstream packages in nixpkgs, which
+        # The 'oriole_pkgs' variable holds all the upstream packages in nixpkgs, which
         # we can use to build our own images; it is the common name to refer to
         # a copy of nixpkgs which contains all its packages.
-        pkgs = import nixpkgs {
+        # it also serves as a base for importing the orioldb/postgres overlay to 
+        #build the orioledb postgres patched version of postgresql16
+        oriole_pkgs = import nixpkgs {
           inherit system;
           overlays = [
             # NOTE (aseipp): add any needed overlays here. in theory we could
@@ -45,8 +47,24 @@
             (import ./overlays/cargo-pgrx.nix)
             (import ./overlays/gdal-small.nix)
             (import ./overlays/psql_16-oriole.nix)
+            
           ];
         };
+        #This variable works the same as 'oriole_pkgs' but builds using the upstream
+        #nixpkgs builds of postgresql 15 and 16 + the overlays listed below
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [
+            # NOTE (aseipp): add any needed overlays here. in theory we could
+            # pull them from the overlays/ directory automatically, but we don't
+            # want to have an arbitrary order, since it might matter. being
+            # explicit is better.
+            (import ./overlays/cargo-pgrx.nix)
+            (import ./overlays/gdal-small.nix)
+            
+          ];
+        };
+
 
         # FIXME (aseipp): pg_prove is yet another perl program that needs
         # LOCALE_ARCHIVE set in non-NixOS environments. upstream this. once that's done, we
@@ -61,6 +79,7 @@
               --set LOCALE_ARCHIVE "${pkgs.glibcLocales}/lib/locale/locale-archive"
           done
         '';
+        
 
         # Our list of PostgreSQL extensions which come from upstream Nixpkgs.
         # These are maintained upstream and can easily be used here just by
@@ -81,6 +100,25 @@
           "pg_repack"
           "pgroonga"
           "timescaledb"
+        ];
+
+        #FIXME for now, timescaledb is not included in the orioledb version of supabase extensions, as there is an issue
+        # with building timescaledb with the orioledb patched version of postgresql
+        orioledbPsqlExtensions = [
+          "postgis"
+          "pgrouting"
+          "pgtap"
+          "pg_cron"
+          "pgaudit"
+          "pgjwt"
+          "plpgsql_check"
+          "pg_safeupdate"
+          "wal2json"
+          /* pljava */
+          "rum"
+          "pg_repack"
+          "pgroonga"
+          /*"timescaledb"*/
         ];
 
         # Custom extensions that exist in our repository. These aren't upstream
@@ -113,7 +151,13 @@
           ./ext/plv8.nix
         ];
 
+        #Where we import and build the orioledb extension, we add on our custom extensions
+        # plus the orioledb option
         orioledbExtension = ourExtensions ++ [./ext/orioledb.nix ];
+
+        #this var is a convenience setting to import the orioledb patched version of postgresql
+        postgresql_orioledb_16 = oriole_pkgs.postgresql_orioledb_16;
+
         # Create a 'receipt' file for a given postgresql package. This is a way
         # of adding a bit of metadata to the package, which can be used by other
         # tools to inspect what the contents of the install are: the PSQL
@@ -150,13 +194,22 @@
           };
         };
 
+        makeOurOrioleDbPostgresPkgs = version: patchedPostgres:
+          let postgresql = patchedPostgres;
+          in map (path: pkgs.callPackage path { inherit postgresql; }) orioledbExtension;
+
         makeOurPostgresPkgs = version:
           let postgresql = pkgs."postgresql_${version}";
           in map (path: pkgs.callPackage path { inherit postgresql; }) ourExtensions;
 
-        makeOurOrioleDbPostgresPkgs = version:
-          let postgresql = pkgs.pg16_oriole;
-          in map (path: pkgs.callPackage path { inherit postgresql; }) orioledbExtension;
+        # Create an attrset that contains all the extensions included in a server for the orioledb version of postgresql + extension.
+        makeOurOrioleDbPostgresPkgsSet = version: patchedPostgres:
+          (builtins.listToAttrs (map
+            (drv:
+              { name = drv.pname; value = drv; }
+            )
+            (makeOurOrioleDbPostgresPkgs version patchedPostgres)))
+          // { recurseForDerivations = true; };
 
         # Create an attrset that contains all the extensions included in a server.
         makeOurPostgresPkgsSet = version:
@@ -167,14 +220,6 @@
             (makeOurPostgresPkgs version)))
           // { recurseForDerivations = true; };
 
-        # Create an attrset that contains all the extensions included in a server.
-        makeOurOrioleDbPostgresPkgsSet = version:
-          (builtins.listToAttrs (map
-            (drv:
-              { name = drv.pname; value = drv; }
-            )
-            (makeOurOrioleDbPostgresPkgs version)))
-          // { recurseForDerivations = true; };
 
         # Create a binary distribution of PostgreSQL, given a version.
         #
@@ -204,19 +249,19 @@
             paths = [ pgbin (makeReceipt pgbin upstreamExts ourExts) ];
           };
 
-        makeOrioleDbPostgresBin = version:
+        makeOrioleDbPostgresBin = version: patchedPostgres:
           let
-            postgresql = pkgs.pg16_oriole;
+            postgresql = patchedPostgres;
             upstreamExts = map
               (ext: {
                 name = postgresql.pkgs."${ext}".pname;
                 version = postgresql.pkgs."${ext}".version;
               })
-              psqlExtensions;
-            ourExts = map (ext: { name = ext.pname; version = ext.version; }) (makeOurOrioleDbPostgresPkgs version);
+              orioledbPsqlExtensions;
+            ourExts = map (ext: { name = ext.pname; version = ext.version; }) (makeOurOrioleDbPostgresPkgs version postgresql);
 
             pgbin = postgresql.withPackages (ps:
-              (map (ext: ps."${ext}") psqlExtensions) ++ (makeOurOrioleDbPostgresPkgs version)
+              (map (ext: ps."${ext}") orioledbPsqlExtensions) ++ (makeOurOrioleDbPostgresPkgs version postgresql)
             );
           in
           pkgs.symlinkJoin {
@@ -357,9 +402,9 @@
           docker = makePostgresDocker version bin;
           recurseForDerivations = true;
         };
-        makeOrioleDbPostgres = version: rec {
-          bin = makeOrioleDbPostgresBin version;
-          exts = makeOurOrioleDbPostgresPkgsSet version;
+        makeOrioleDbPostgres = version: patchedPostgres: rec {
+          bin = makeOrioleDbPostgresBin version patchedPostgres;
+          exts = makeOurOrioleDbPostgresPkgsSet version patchedPostgres;
           docker = makePostgresDocker version bin;
           recurseForDerivations = true;
         };
@@ -372,7 +417,7 @@
           # PostgreSQL versions.
           psql_15 = makePostgres "15";
           psql_16 = makePostgres "16";
-          psql_orioledb_16 = makeOrioleDbPostgres "16";
+          psql_orioledb_16 = makeOrioleDbPostgres "16_23" postgresql_orioledb_16;
 
           # Start a version of the server.
           start-server =
