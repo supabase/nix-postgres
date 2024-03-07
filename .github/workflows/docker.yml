@@ -26,8 +26,11 @@ jobs:
 
       - name: Build images
         run: |
-          nix build .#psql_14/docker -o result-docker-14
           nix build .#psql_15/docker -o result-docker-15
+          nix build .#psql_16/docker -o result-docker-16
+          nix build .#psql_orioledb_16/docker -o result-docker-orioledb-16
+          
+
 
       - name: Tag images
         run: |

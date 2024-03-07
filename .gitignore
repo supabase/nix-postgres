@@ -16,3 +16,6 @@ sbom.spdx.json
 sbom.cdx.json
 sbom.csv
 graph*.png
+init.sh
+postgres*
+build.log
