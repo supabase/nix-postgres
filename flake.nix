@@ -118,7 +118,7 @@
           "rum"
           "pg_repack"
           "pgroonga"
-          /*"timescaledb"*/
+          "timescaledb"
         ];
 
         # Custom extensions that exist in our repository. These aren't upstream
@@ -417,7 +417,7 @@
           # PostgreSQL versions.
           psql_15 = makePostgres "15";
           psql_16 = makePostgres "16";
-          psql_orioledb_16 = makeOrioleDbPostgres "16_23" postgresql_orioledb_16;
+          psql_orioledb_16 = makeOrioleDbPostgres "16_24" postgresql_orioledb_16;
 
           # Start a version of the server.
           start-server =
