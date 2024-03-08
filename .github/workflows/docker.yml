@@ -2,8 +2,9 @@ name: Docker
 
 on:
   push:
-    branches: [ 'main', 'sam/gh-docker-action' ]
-
+    branches: [ 'main']
+  pull_request:
+  #temp until we docker build is resolved
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
