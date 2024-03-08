@@ -2,7 +2,7 @@ name: Docker
 
 on:
   push:
-    branches: [ 'main' ]
+    branches: [ 'main', 'sam/gh-docker-action' ]
 
 env:
   REGISTRY: ghcr.io
@@ -21,6 +21,8 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+      - uses: DeterminateSystems/nix-installer-action@main
+
         with:
           fetch-depth: 0
 
@@ -35,7 +37,7 @@ jobs:
       - name: Tag images
         run: |
           set -x
-          for x in 14 15; do
+          for x in 15 16 orioledb-16; do
             docker load -i result-docker-$x
             docker tag postgresql-$x:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$x:${GITHUB_SHA}
             docker tag postgresql-$x:latest ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$x:latest
@@ -51,7 +53,7 @@ jobs:
       - name: Push image to the Container registry
         run: |
           set -x
-          for x in 14 15; do
+          for x in 15 16 orioledb-16; do
             docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$x:${GITHUB_SHA}
             docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-$x:latest
           done
