@@ -10,8 +10,8 @@ alias c := check
 
 build-all:
     nix build .#psql_15/bin .#psql_15/docker
-    nix build .#psql_16/bin .#psql_16/docker
-    nix build .#psql_orioledb_16/bin .#psql_orioledb_16/docker
+    # nix build .#psql_16/bin .#psql_16/docker
+    # nix build .#psql_orioledb_16/bin .#psql_orioledb_16/docker
 
 check:
     nix flake check -L

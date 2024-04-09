@@ -14,7 +14,13 @@ jobs:
   build:
     strategy:
       fail-fast: false
-    runs-on: ubuntu-latest
+      matrix:
+        include:
+          - runner: [self-hosted, X64]
+            arch: amd64
+          - runner: [self-hosted, arm-runner]
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
     name: nix-build
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
@@ -40,7 +46,7 @@ jobs:
 
       - name: build and copy to S3
         run: |
-          for x in 15 16 orioledb_16; do
+          for x in 15; do
             nix build .#psql_$x/bin -o result-$x
           done
           nix copy --to s3://nix-postgres-artifacts?secret-key=nix-secret-key ./result*

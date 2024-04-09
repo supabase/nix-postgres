@@ -38,6 +38,6 @@ jobs:
       - name: Push image to the Container registry
         run: |
           set -x
-          for x in 15 16 orioledb_16; do
+          for x in 15; do
             nix build .#psql_$x/docker.copyToRegistry          
           done
