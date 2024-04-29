@@ -1,4 +1,12 @@
-# prototype nix package for supabase postgres
+# ARCHIVED: prototype nix package for supabase postgres
+
+> ⚠️ 🚧 **NOTE** 🚧
+> 
+> This repository is archived
+> 
+> Development of this functionality has moved to [supabase/postgres](https://github.com/supabase/postgres/tree/develop/nix)
+
+--------------------
 
 This repository contains **experimental code** to package PostgreSQL using
 **[Nix]**, and tooling and infrastructure for deploying it. Read the rest of
@@ -10,11 +18,6 @@ and some of the design constraints this repository are under, please see the
 
 If you want to install Nix and play along quickly, check out the
 [Start Here](./docs/start-here.md) page.
-
-> ⚠️ 🚧 **NOTE** 🚧 ⚠️ &mdash; This repository is **EXPERIMENTAL**. It is not an
-> official Supabase project, and may be abandoned or changed at any moment;
-> there is no commitment to any kind of external third party support at this
-> time.
 
 [Nix]: https://nixos.org
 
